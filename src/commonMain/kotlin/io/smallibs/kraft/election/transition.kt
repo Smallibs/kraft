@@ -1,5 +1,11 @@
 package io.smallibs.kraft.election
 
+import io.smallibs.kraft.election.Action.*
+import io.smallibs.kraft.election.Node.*
+import io.smallibs.kraft.election.Reaction.*
+import io.smallibs.kraft.election.Timer.Election
+import io.smallibs.kraft.election.Timer.Heartbeat
+
 // First level
 
 infix fun Node.perform(action: Action): Pair<Node, List<Reaction>> =
@@ -32,7 +38,7 @@ private fun Follower.perform(action: Action) =
         is TimeOut ->
             when {
                 action.timer != Election -> changeNothing()
-                this.extendedTime -> this.resetTime() to listOf(ArmElectionTimeout)
+                this.extended -> this.resetTime() to listOf(ArmElectionTimeout)
                 else -> this.becomeElector().becomeCandidate() to listOf(StartElection, ArmElectionTimeout)
             }
         is RequestAppend ->

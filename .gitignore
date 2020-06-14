@@ -1,3 +1,7 @@
+# Gradle
+build
+.gradle
+
 # Idea project
 .idea
 
