@@ -33,8 +33,10 @@ class TransitionImpl : Transition {
                     action.timer != Heartbeat -> changeNothing()
                     else -> this to listOf(SynchroniseLog(), ArmHeartbeatTimeout())
                 }
-            is AppendResponse -> this to listOf(AppendAccepted(action))
-            else -> changeNothing()
+            is AppendResponse ->
+                this to listOf(AppendAccepted(action))
+            else ->
+                changeNothing()
         }
 
     private fun <A> Follower.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
@@ -47,7 +49,8 @@ class TransitionImpl : Transition {
                 }
             is RequestAppend<A> ->
                 this.extendTime() to listOf(AppendRequested(action))
-            else -> changeNothing()
+            else ->
+                changeNothing()
         }
 
     private fun <A> Candidate.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
@@ -62,7 +65,8 @@ class TransitionImpl : Transition {
                     winElection() -> this.becomeLeader() to listOf(StartElection(), ArmHeartbeatTimeout())
                     else -> this.becomeCandidate(action.follower) to listOf()
                 }
-            else -> changeNothing()
+            else ->
+                changeNothing()
         }
 
     private fun <A> Elector.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
@@ -72,18 +76,24 @@ class TransitionImpl : Transition {
                     action.timer != Election -> changeNothing()
                     else -> this.becomeCandidate() to listOf(StartElection(), ArmElectionTimeout())
                 }
-            is RequestVote -> this.becomeFollower(action.candidate).extendTime() to listOf(AcceptVote(action.candidate))
-            else -> changeNothing()
+            is RequestVote ->
+                this.becomeFollower(action.candidate).extendTime() to listOf(AcceptVote(action.candidate))
+            else ->
+                changeNothing()
         }
 
     private fun <A> Node.stepDown(action: Action<A>): Pair<Node, List<Reaction<A>>> =
         this.becomeElector().changeTerm(action.term) to when (this) {
-            is Leader -> listOf(ArmElectionTimeout())
-            else -> listOf()
+            is Leader ->
+                listOf(ArmElectionTimeout())
+            else ->
+                listOf()
         }
 
-    private fun <A> Node.changeNothing(): Pair<Node, List<Reaction<A>>> = this to listOf()
+    private fun <A> Node.changeNothing() =
+        this to listOf<Reaction<A>>()
 
-    private fun Candidate.winElection() = followers.size * 2 > context.numberOfNodes
+    private fun Candidate.winElection() =
+        followers.size * 2 > context.numberOfNodes
 
 }
