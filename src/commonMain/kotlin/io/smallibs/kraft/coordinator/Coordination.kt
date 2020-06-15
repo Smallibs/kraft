@@ -1,17 +1,20 @@
 package io.smallibs.kraft.coordinator
 
+import io.smallibs.kraft.common.Identifier
 import io.smallibs.kraft.coordinator.service.Connector
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action
 import io.smallibs.kraft.election.data.Action.AppendResponse
 import io.smallibs.kraft.election.data.Action.RequestAppend
 import io.smallibs.kraft.election.data.Node
+import io.smallibs.kraft.election.data.Node.Leader
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.Timer
 import io.smallibs.kraft.log.LeaderManager
 import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
+import io.smallibs.kraft.log.data.Appended
 
 class Coordination<A>(
     private val connector: Connector<A>,
@@ -29,9 +32,7 @@ class Coordination<A>(
         Coordination(connector, runner, behavior, logManager, leaderManager)
 
     fun accept(action: Action<A>) = Transition.run {
-        behavior.perform(action).let {
-            execute(it.first, it.second)
-        }
+        behavior.perform(action).let { execute(it.first, it.second) }
     }
 
     //
@@ -53,7 +54,7 @@ class Coordination<A>(
 
     private fun setLeaderManager() =
         when (behavior) {
-            is Node.Leader ->
+            is Leader ->
                 (leaderManager ?: LeaderManager(behavior.context.self, logManager, behavior.context.livingNodes)).let {
                     this(leaderManager = it)
                 }
@@ -61,9 +62,7 @@ class Coordination<A>(
         }
 
     private fun armTimeout(timer: Timer) =
-        connector.scheduleTimeOut(timer).let {
-            this
-        }
+        connector.scheduleTimeOut(timer).let { this }
 
 
     private fun startElection() =
@@ -73,55 +72,45 @@ class Coordination<A>(
                 behavior.context.term,
                 logManager.last()
             )
-        }.let {
-            this
-        }
+        }.let { this }
 
     private fun acceptVote() =
-        connector.acceptVote(behavior.context.self, behavior.context.term).let {
-            this
-        }
+        connector.acceptVote(behavior.context.self, behavior.context.term).let { this }
 
     private fun synchroniseLog() =
         leaderManager?.let {
             it.prepareAppend().forEach {
-                connector.appendEntries(
-                    it.key,
-                    RequestAppend(
-                        behavior.context.self,
-                        behavior.context.term,
-                        it.value.previous,
-                        it.value.leaderCommit,
-                        it.value.entries
-                    )
-                )
+                connector.appendEntries(it.key, requestAppend(it.key, it.value))
             }
-        }.let {
-            this
-        }
+        }.let { this }
+
+    private fun requestAppend(it: Identifier, value: Append<A>) =
+        RequestAppend(
+            behavior.context.self,
+            behavior.context.term,
+            value.previous,
+            value.leaderCommit,
+            value.entries
+        )
 
     private fun appendRequest(requestAppend: RequestAppend<A>) =
         logManager.append(
-            Append(
-                requestAppend.previous,
-                requestAppend.leaderCommit,
-                requestAppend.entries
-            )
+            Append(requestAppend.previous, requestAppend.leaderCommit, requestAppend.entries)
         ).let {
-            connector.appendResult(
-                requestAppend.leader,
-                AppendResponse(
-                    behavior.context.self,
-                    requestAppend.term,
-                    true,
-                    it.second.matchIndex
-                )
-            )
+            connector.appendResult(requestAppend.leader, appendResponse(requestAppend, it))
 
             it.second.entries.map { it.value }.forEach(runner)
 
             this(logManager = it.first)
         }
+
+    private fun appendResponse(requestAppend: RequestAppend<A>, it: Pair<LogManager<A>, Appended<A>>) =
+        AppendResponse<A>(
+            behavior.context.self,
+            requestAppend.term,
+            true,
+            it.second.matchIndex
+        )
 
     private fun appendAccepted(appendResponse: AppendResponse<A>) =
         when {
