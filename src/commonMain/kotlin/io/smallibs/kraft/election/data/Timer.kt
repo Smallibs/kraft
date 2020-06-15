@@ -1,4 +1,4 @@
-package io.smallibs.kraft.election
+package io.smallibs.kraft.election.data
 
 sealed class Timer {
 
