@@ -12,6 +12,6 @@ interface Transition {
     companion object {
         fun <R> run(block: Transition.() -> R): R = Transition().run(block)
 
-        operator fun <A> invoke(): Transition = TransitionImpl()
+        operator fun invoke(): Transition = TransitionImpl()
     }
 }
