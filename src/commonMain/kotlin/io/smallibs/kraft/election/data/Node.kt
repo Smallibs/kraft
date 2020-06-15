@@ -10,8 +10,10 @@ sealed class Node(open val context: Context) {
     data class Elector(override val context: Context) : Node(context) {
         fun becomeFollower(candidate: Identifier) =
             Follower(context, candidate, false)
+
         fun changeTerm(term: Term): Node =
             Elector(context.changeTerm(term))
+
         fun becomeCandidate() =
             Candidate(context.changeTerm(context.term.next()))
     }

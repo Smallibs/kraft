@@ -22,7 +22,7 @@ class Coordination<A>(
 ) {
 
     private operator fun invoke(
-        behavior: Node,
+        behavior: Node = this.behavior,
         logManager: LogManager<A> = this.logManager,
         leaderManager: LeaderManager<A>? = this.leaderManager
     ): Coordination<A> =
@@ -39,34 +39,34 @@ class Coordination<A>(
     //
 
     private fun execute(behavior: Node, reactions: List<Reaction<A>>) =
-        reactions.fold(setLeaderManager(behavior)) { coordination, action ->
+        reactions.fold(this(behavior).setLeaderManager()) { coordination, action ->
             when (action) {
-                is ArmElectionTimeout -> coordination.armTimeout(behavior, Timer.Election)
-                is ArmHeartbeatTimeout -> coordination.armTimeout(behavior, Timer.Heartbeat)
-                is StartElection -> coordination.startElection(behavior)
-                is AcceptVote -> coordination.acceptVote(behavior)
-                is SynchroniseLog -> coordination.synchroniseLog(behavior)
-                is AppendRequested -> coordination.appendRequest(action, behavior)
-                is AppendAccepted -> coordination.appendAccepted(action, behavior)
+                is ArmElectionTimeout -> coordination.armTimeout(Timer.Election)
+                is ArmHeartbeatTimeout -> coordination.armTimeout(Timer.Heartbeat)
+                is StartElection -> coordination.startElection()
+                is AcceptVote -> coordination.acceptVote()
+                is SynchroniseLog -> coordination.synchroniseLog()
+                is AppendRequested -> coordination.appendRequest(action.requestAppend)
+                is AppendAccepted -> coordination.appendAccepted(action.appendResponse)
             }
         }
 
-    private fun setLeaderManager(behavior: Node) =
+    private fun setLeaderManager() =
         when (behavior) {
             is Node.Leader ->
                 (leaderManager ?: LeaderManager(behavior.context.self, logManager, behavior.context.livingNodes)).let {
-                    this(behavior, leaderManager = it)
+                    this(leaderManager = it)
                 }
             else -> this
         }
 
-    private fun armTimeout(behavior: Node, timer: Timer) =
+    private fun armTimeout(timer: Timer) =
         connector.scheduleTimeOut(timer).let {
-            this(behavior)
+            this
         }
 
 
-    private fun startElection(behavior: Node) =
+    private fun startElection() =
         behavior.context.livingNodes.forEach {
             connector.requestVote(
                 it,
@@ -74,15 +74,15 @@ class Coordination<A>(
                 logManager.last()
             )
         }.let {
-            this(behavior)
+            this
         }
 
-    private fun acceptVote(behavior: Node) =
+    private fun acceptVote() =
         connector.acceptVote(behavior.context.self, behavior.context.term).let {
-            this(behavior)
+            this
         }
 
-    private fun synchroniseLog(behavior: Node) =
+    private fun synchroniseLog() =
         leaderManager?.let {
             it.prepareAppend().forEach {
                 connector.appendEntries(
@@ -97,22 +97,22 @@ class Coordination<A>(
                 )
             }
         }.let {
-            this(behavior)
+            this
         }
 
-    private fun appendRequest(action: AppendRequested<A>, behavior: Node) =
+    private fun appendRequest(requestAppend: RequestAppend<A>) =
         logManager.append(
             Append(
-                action.requestAppend.previous,
-                action.requestAppend.leaderCommit,
-                action.requestAppend.entries
+                requestAppend.previous,
+                requestAppend.leaderCommit,
+                requestAppend.entries
             )
         ).let {
             connector.appendResult(
-                action.requestAppend.leader,
+                requestAppend.leader,
                 AppendResponse(
                     behavior.context.self,
-                    action.requestAppend.term,
+                    requestAppend.term,
                     true,
                     it.second.matchIndex
                 )
@@ -120,21 +120,21 @@ class Coordination<A>(
 
             it.second.entries.map { it.value }.forEach(runner)
 
-            this(behavior, logManager = it.first)
+            this(logManager = it.first)
         }
 
-    private fun appendAccepted(action: AppendAccepted<A>, behavior: Node) =
+    private fun appendAccepted(appendResponse: AppendResponse<A>) =
         when {
-            action.appendResponse.success ->
-                leaderManager?.appended(action.appendResponse.follower, action.appendResponse.matchIndex)
+            appendResponse.success ->
+                leaderManager?.appended(appendResponse.follower, appendResponse.matchIndex)
             else ->
-                leaderManager?.rejected(action.appendResponse.follower)
+                leaderManager?.rejected(appendResponse.follower)
         }.let {
             it?.updateCommitIndex()
         }.let {
             it?.let { it.second.map { it.value }.forEach(runner) }
 
-            this(behavior, leaderManager = it?.first)
+            this(leaderManager = it?.first)
         }
 
 }
