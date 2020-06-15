@@ -20,7 +20,6 @@ interface LeaderManager<A> {
 
     fun updateCommitIndex(): Pair<LeaderManager<A>, List<Entry<A>>>
 
-
     companion object {
         operator fun <A> invoke(self: Identifier, logManager: LogManager<A>, identifiers: List<Identifier>) =
             LeaderManagerImpl(

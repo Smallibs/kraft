@@ -10,6 +10,8 @@ interface Transition {
     infix fun <A> Node.perform(action: Action<A>): Pair<Node, List<Reaction<A>>>
 
     companion object {
+        fun <R> run(block: Transition.() -> R): R = Transition().run(block)
+
         operator fun <A> invoke(): Transition = TransitionImpl()
     }
 }

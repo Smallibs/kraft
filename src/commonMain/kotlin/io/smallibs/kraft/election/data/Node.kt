@@ -1,6 +1,5 @@
 package io.smallibs.kraft.election.data
 
-import io.smallibs.kraft.common.Context
 import io.smallibs.kraft.common.Identifier
 import io.smallibs.kraft.common.Term
 

@@ -72,7 +72,7 @@ class TransitionImpl : Transition {
                     action.timer != Election -> changeNothing()
                     else -> this.becomeCandidate() to listOf(StartElection(), ArmElectionTimeout())
                 }
-            is RequestVote -> this.becomeFollower(action.candidate).extendTime() to listOf()
+            is RequestVote -> this.becomeFollower(action.candidate).extendTime() to listOf(AcceptVote(action.candidate))
             else -> changeNothing()
         }
 

@@ -15,8 +15,7 @@ sealed class Action<A>(open val term: Term) {
     data class RequestVote<A>(
         val candidate: Identifier,
         override val term: Term,
-        val lastLogIndex: Index,
-        val lastLogTerm: Term
+        val lastLog: Pair<Index, Term>
     ) : Action<A>(term)
 
     data class Voted<A>(
@@ -28,8 +27,7 @@ sealed class Action<A>(open val term: Term) {
     data class RequestAppend<A>(
         val leader: Identifier,
         override val term: Term,
-        var previousIndex: Index,
-        val previousTerm: Term,
+        var previous: Pair<Index, Term>,
         val leaderCommit: Index,
         val entries: List<Entry<A>> = listOf()
     ) : Action<A>(term)
@@ -38,7 +36,7 @@ sealed class Action<A>(open val term: Term) {
         val follower: Identifier,
         override val term: Term,
         val success: Boolean,
-        var matchIndex: Int
+        var matchIndex: Index
     ) : Action<A>(term)
 
 }
