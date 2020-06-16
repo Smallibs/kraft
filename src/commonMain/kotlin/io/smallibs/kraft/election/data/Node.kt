@@ -19,14 +19,11 @@ sealed class Node(open val context: Context) {
             otherNodes: List<Identifier>
         ) : this(Context(self, term, otherNodes))
 
-        fun becomeFollower(candidate: Identifier) =
-            Follower(context, candidate, false)
+        fun changeTerm(term: Term): Node = Elector(context.changeTerm(term))
 
-        fun changeTerm(term: Term): Node =
-            Elector(context.changeTerm(term))
+        fun becomeFollower(candidate: Identifier) = Follower(context, candidate, false)
 
-        fun becomeCandidate() =
-            Candidate(context.changeTerm(context.term.next()))
+        fun becomeCandidate() = Candidate(context.changeTerm(context.term.next()))
     }
 
     data class Candidate(override val context: Context, val followers: List<Identifier> = listOf()) : Node(context) {
@@ -39,8 +36,8 @@ sealed class Node(open val context: Context) {
         ) : this(Context(self, term, livingNodes), followers)
 
         fun becomeLeader() = Leader(context)
-        fun becomeCandidate(follower: Identifier) =
-            Candidate(context, followers + follower)
+
+        fun stayCandidate(follower: Identifier) = Candidate(context, followers + follower)
     }
 
     data class Follower(override val context: Context, val leader: Identifier, val extended: Boolean) : Node(context) {
@@ -49,11 +46,12 @@ sealed class Node(open val context: Context) {
             self: Identifier,
             term: Term,
             livingNodes: List<Identifier>,
-            leader: Identifier
-        ) : this(Context(self, term, livingNodes), leader, false)
-
+            leader: Identifier,
+            extended: Boolean = false
+        ) : this(Context(self, term, livingNodes), leader, extended)
 
         fun extendTime() = Follower(context, leader, true)
+
         fun resetTime() = Follower(context, leader, false)
     }
 

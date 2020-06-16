@@ -6,12 +6,23 @@ import io.smallibs.kraft.common.Term.Companion.term
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node.*
-import io.smallibs.kraft.election.data.Reaction.ArmHeartbeatTimeout
-import io.smallibs.kraft.election.data.Reaction.SynchroniseLog
+import io.smallibs.kraft.election.data.Reaction.*
+import io.smallibs.kraft.election.data.Timer
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class CandidateTransitionTest {
+
+    @Test
+    fun `Candidate should stay a Candidate on timeout`() {
+        Transition.run {
+            Candidate("A".id, 1.term, listOf("A".id, "B".id))
+                .perform({ true }, TimeOut<Unit>(Timer.Election, 1.term))
+        }.let {
+            assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
+            assertEquals(listOf(StartElection(), ArmElectionTimeout()), it.second)
+        }
+    }
 
     @Test
     fun `Candidate should become a Leader on Vote when one Node`() {

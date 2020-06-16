@@ -48,7 +48,7 @@ class TransitionImpl : Transition {
                 when {
                     action.timer != Election -> changeNothing()
                     extended -> this.resetTime() to listOf(ArmElectionTimeout())
-                    else -> this.becomeElector().becomeCandidate() to listOf(StartElection(), ArmElectionTimeout())
+                    else -> this.becomeElector() to listOf(ArmElectionTimeout())
                 }
             is RequestAppend<A> ->
                 this.extendTime() to listOf(AppendRequested(action))
@@ -66,7 +66,7 @@ class TransitionImpl : Transition {
             is Voted ->
                 when {
                     winElection() -> this.becomeLeader() to listOf(SynchroniseLog(), ArmHeartbeatTimeout())
-                    else -> this.becomeCandidate(action.follower) to listOf()
+                    else -> this.stayCandidate(action.follower) to listOf()
                 }
             else ->
                 changeNothing()
