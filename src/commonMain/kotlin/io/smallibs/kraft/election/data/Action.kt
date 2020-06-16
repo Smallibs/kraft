@@ -20,8 +20,7 @@ sealed class Action<A>(open val term: Term) {
 
     data class Voted<A>(
         val follower: Identifier,
-        override val term: Term,
-        val accepted: Boolean
+        override val term: Term
     ) : Action<A>(term)
 
     data class RequestAppend<A>(

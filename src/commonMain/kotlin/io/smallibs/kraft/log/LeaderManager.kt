@@ -31,6 +31,6 @@ interface LeaderManager<A> {
             )
 
         fun <A> initialIndexes(logManager: LogManager<A>) =
-            Indexes(logManager.previous().first + 1, 0.index())
+            Indexes(logManager.previous().first + 1, 0.index)
     }
 }

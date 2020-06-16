@@ -66,7 +66,7 @@ class TransitionImpl : Transition {
                 }
             is Voted ->
                 when {
-                    winElection() -> this.becomeLeader() to listOf(StartElection(), ArmHeartbeatTimeout())
+                    winElection() -> this.becomeLeader() to listOf(SynchroniseLog(), ArmHeartbeatTimeout())
                     else -> this.becomeCandidate(action.follower) to listOf()
                 }
             else ->
@@ -78,7 +78,7 @@ class TransitionImpl : Transition {
             is TimeOut ->
                 when {
                     action.timer != Election -> changeNothing()
-                    else -> this.becomeCandidate() to listOf(StartElection(), ArmElectionTimeout())
+                    else -> this.becomeCandidate() to listOf(AcceptVote(self), StartElection(), ArmElectionTimeout())
                 }
             is RequestVote ->
                 this.becomeFollower(action.candidate).extendTime() to listOf(AcceptVote(action.candidate))
@@ -98,7 +98,7 @@ class TransitionImpl : Transition {
         this to listOf<Reaction<A>>()
 
     private fun Candidate.winElection() =
-        followers.size * 2 > numberOfNodes
+        (followers.size + 1) * 2 > livingNodes.size
 
     private fun <A> Node.isYoungerTerm(action: Action<A>) =
         action.term > term

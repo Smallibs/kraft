@@ -29,12 +29,12 @@ class LogManagerImpl<A>(
         log.size()
 
     override fun previous() =
-        max(0, logSize() - 1).index().let {
+        max(0, logSize() - 1).index.let {
             it to termAt(it)
         }
 
     override fun last() =
-        logSize().index().let {
+        logSize().index.let {
             it to termAt(it)
         }
 
@@ -43,7 +43,7 @@ class LogManagerImpl<A>(
     }
 
     override fun termAt(index: Index): Term {
-        return log.find(index - 1)?.term ?: 0.term()
+        return log.find(index - 1)?.term ?: 0.term
     }
 
     override fun append(entry: Entry<A>): LogManager<A> {
@@ -92,7 +92,7 @@ class LogManagerImpl<A>(
 
     private fun collectedActionsToApply() =
         IntRange(lastApplied.value, commitIndex.value).map {
-            log.find(it.index())!!
+            log.find(it.index)!!
         }.let {
             this(lastApplied = commitIndex) to it
         }

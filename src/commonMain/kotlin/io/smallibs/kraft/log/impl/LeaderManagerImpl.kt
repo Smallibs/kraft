@@ -35,7 +35,7 @@ class LeaderManagerImpl<A>(
 
     override fun rejected(node: Identifier) =
         (this.indexes[node] ?: initialIndexes(this.logManager)).let {
-            Indexes(max(1.index(), it.next - 1), it.match)
+            Indexes(max(1.index, it.next - 1), it.match)
         }.let {
             LeaderManagerImpl(logManager, indexes + (node to it))
         }
@@ -63,13 +63,13 @@ class LeaderManagerImpl<A>(
     private fun commitIndex() =
         when {
             indexes.isEmpty() ->
-                logManager.logSize().index()
+                logManager.logSize().index
             else ->
                 indexes
                     .map { it.value.match.value }
                     .sortedDescending()
                     .get(this.indexes.size / 2)
-                    .index()
+                    .index
         }
 
 
