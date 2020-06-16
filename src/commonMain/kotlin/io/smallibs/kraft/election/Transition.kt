@@ -12,9 +12,6 @@ interface Transition {
     fun <A> Node.perform(hasNotLeaderCompleteness: (Action<A>) -> Boolean, action: Action<A>): TransitionResult<A>
 
     companion object {
-        fun <A> run(block: Transition.() -> TransitionResult<A>): TransitionResult<A> =
-            Transition().run(block)
-
-        operator fun invoke(): Transition = TransitionImpl()
+        fun <A> run(block: Transition.() -> TransitionResult<A>) = TransitionImpl().run(block)
     }
 }

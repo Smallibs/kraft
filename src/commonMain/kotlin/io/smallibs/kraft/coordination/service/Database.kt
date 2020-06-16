@@ -1,4 +1,4 @@
-package io.smallibs.kraft.coordinator.service
+package io.smallibs.kraft.coordination.service
 
 interface Database<A> {
 

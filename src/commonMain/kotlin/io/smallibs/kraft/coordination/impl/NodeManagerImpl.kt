@@ -1,9 +1,9 @@
-package io.smallibs.kraft.coordinator.impl
+package io.smallibs.kraft.coordination.impl
 
 import io.smallibs.kraft.common.Entry
-import io.smallibs.kraft.coordinator.Coordination
-import io.smallibs.kraft.coordinator.service.Connector
-import io.smallibs.kraft.coordinator.service.Database
+import io.smallibs.kraft.coordination.NodeManager
+import io.smallibs.kraft.coordination.service.Connector
+import io.smallibs.kraft.coordination.service.Database
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action
 import io.smallibs.kraft.election.data.Action.*
@@ -16,20 +16,19 @@ import io.smallibs.kraft.log.LeaderManager
 import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Appended
-import io.smallibs.kraft.log.impl.LeaderManagerImpl
 
-class CoordinationImpl<A>(
+class NodeManagerImpl<A>(
     private val connector: Connector<A>,
     private val database: Database<A>,
     private val behavior: Node,
     private val logManager: LogManager<A>,
     private val leaderManager: LeaderManager<A>?
-) : Coordination<A> {
+) : NodeManager<A> {
 
     override fun accept(action: Action<A>) = Transition.run {
         behavior.perform(::hasNotLeaderCompleteness, action)
     }.let {
-        this(it.first)(leaderManager = leaderManager()).execute(it.second)
+        this(it.first)(leaderManager = mayBeLeaderManager).execute(it.second)
     }
 
     private fun execute(reactions: List<Reaction<A>>) =
@@ -83,16 +82,13 @@ class CoordinationImpl<A>(
         logManager: LogManager<A> = this.logManager,
         leaderManager: LeaderManager<A>? = this.leaderManager
     ) =
-        CoordinationImpl(connector, database, behavior, logManager, leaderManager)
+        NodeManagerImpl(connector, database, behavior, logManager, leaderManager)
 
-    private fun leaderManager() =
-        when (behavior) {
-            is Leader -> leaderManager ?: newLeaderManager
+    private val mayBeLeaderManager: LeaderManager<A>?
+        get() = when (behavior) {
+            is Leader -> leaderManager ?: LeaderManager(behavior.self, logManager, behavior.livingNodes)
             else -> leaderManager
         }
-
-    private val newLeaderManager: LeaderManagerImpl<A>
-        get() = LeaderManager(behavior.self, logManager, behavior.livingNodes)
 
     private fun appendAccepted(response: AppendResponse<A>) =
         when {
@@ -125,4 +121,3 @@ class CoordinationImpl<A>(
         }
 
 }
-
