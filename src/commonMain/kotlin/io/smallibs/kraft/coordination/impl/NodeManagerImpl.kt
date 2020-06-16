@@ -27,17 +27,17 @@ class NodeManagerImpl<A>(
 ) : NodeManager<A> {
 
     override fun insert(a: A): NodeManager<A> =
-        leaderManager?.let {
-            this(logManager = logManager.append(Entry(behavior.term, a)))
+        mayBeLeaderManager?.let {
+            this(leaderManager = it.accept(Entry(behavior.term, a)))
         } ?: when (behavior) {
             is Follower -> connector.insert(behavior.leader, a).let { this }
             else -> this
-        }
+        }(leaderManager = null)
 
     override fun accept(action: Action<A>) = Transition.run {
-        behavior.perform(::hasNotLeaderCompleteness, action)
+        behavior.perform(::hasLeaderCompleteness, action)
     }.let {
-        this(it.first)(leaderManager = mayBeLeaderManager).execute(it.second)
+        this(it.first, leaderManager = mayBeLeaderManager).execute(it.second)
     }
 
     private fun execute(reactions: List<Reaction<A>>) =
@@ -120,13 +120,13 @@ class NodeManagerImpl<A>(
             this(database = it)
         }
 
-    private fun hasNotLeaderCompleteness(action: Action<A>): Boolean =
+    private fun hasLeaderCompleteness(action: Action<A>): Boolean =
         when (action) {
             is RequestVote ->
                 logManager.termAt(logManager.last().first).let { logTerm ->
                     action.lastLog.second > logTerm || (action.lastLog.first >= logManager.last().first && action.lastLog.second == logTerm)
-                }.not()
-            else -> false
+                }
+            else -> true
         }
 
 }

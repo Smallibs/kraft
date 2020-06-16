@@ -30,8 +30,14 @@ import io.smallibs.kraft.election.data.Action
 
 interface NodeManager<A> {
 
-    fun insert(a: A) : NodeManager<A>
+    /**
+     * Method called when a new operation should be performed on the database.
+     */
+    fun insert(a: A): NodeManager<A>
 
+    /**
+     * Method called when an action has been received by the system.
+     */
     fun accept(action: Action<A>): NodeManager<A>
 
 }

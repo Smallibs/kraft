@@ -13,17 +13,18 @@ import io.smallibs.kraft.election.data.Timer.Heartbeat
 
 class TransitionImpl : Transition {
 
-    override fun <A> Node.perform(hasNotLeaderCompleteness: (Action<A>) -> Boolean, action: Action<A>) =
+    override fun <A> Node.perform(hasLeaderCompleteness: (Action<A>) -> Boolean, action: Action<A>) =
         when {
             isOlderTerm(action) -> this.changeNothing()
             isYoungerTerm(action) -> this.stepDown(action)
-            hasNotLeaderCompleteness(action) -> changeNothing()
-            else -> when (this) {
-                is Leader -> this.perform(action)
-                is Follower -> this.perform(action)
-                is Candidate -> this.perform(action)
-                is Elector -> this.perform(action)
-            }
+            hasLeaderCompleteness(action).not() -> changeNothing()
+            else ->
+                when (this) {
+                    is Leader -> this.perform(action)
+                    is Follower -> this.perform(action)
+                    is Candidate -> this.perform(action)
+                    is Elector -> this.perform(action)
+                }
         }
 
     // Second level
