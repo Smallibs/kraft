@@ -5,15 +5,15 @@ import io.smallibs.kraft.election.data.Node
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.impl.TransitionImpl
 
+typealias TransitionResult<A> = Pair<Node, List<Reaction<A>>>
+
 interface Transition {
 
-    fun <A> Node.perform(
-        hasNotLeaderCompleteness: (Action<A>) -> Boolean,
-        action: Action<A>
-    ): Pair<Node, List<Reaction<A>>>
+    fun <A> Node.perform(hasNotLeaderCompleteness: (Action<A>) -> Boolean, action: Action<A>): TransitionResult<A>
 
     companion object {
-        fun <R> run(block: Transition.() -> R): R = Transition().run(block)
+        fun <A> run(block: Transition.() -> TransitionResult<A>): TransitionResult<A> =
+            Transition().run(block)
 
         operator fun invoke(): Transition = TransitionImpl()
     }

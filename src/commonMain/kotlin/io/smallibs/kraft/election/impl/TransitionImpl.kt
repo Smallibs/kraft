@@ -1,6 +1,7 @@
 package io.smallibs.kraft.election.impl
 
 import io.smallibs.kraft.election.Transition
+import io.smallibs.kraft.election.TransitionResult
 import io.smallibs.kraft.election.data.Action
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node
@@ -15,7 +16,7 @@ class TransitionImpl : Transition {
     override fun <A> Node.perform(
         hasNotLeaderCompleteness: (Action<A>) -> Boolean,
         action: Action<A>
-    ): Pair<Node, List<Reaction<A>>> =
+    ): TransitionResult<A> =
         when {
             isOlderTerm(action) -> this.changeNothing()
             isYoungerTerm(action) -> this.stepDown(action)
@@ -30,7 +31,7 @@ class TransitionImpl : Transition {
 
     // Second level
 
-    private fun <A> Leader.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
+    private fun <A> Leader.perform(action: Action<A>): TransitionResult<A> =
         when (action) {
             is TimeOut ->
                 when {
@@ -43,7 +44,7 @@ class TransitionImpl : Transition {
                 changeNothing()
         }
 
-    private fun <A> Follower.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
+    private fun <A> Follower.perform(action: Action<A>): TransitionResult<A> =
         when (action) {
             is TimeOut ->
                 when {
@@ -57,7 +58,7 @@ class TransitionImpl : Transition {
                 changeNothing()
         }
 
-    private fun <A> Candidate.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
+    private fun <A> Candidate.perform(action: Action<A>): TransitionResult<A> =
         when (action) {
             is TimeOut ->
                 when {
@@ -73,7 +74,7 @@ class TransitionImpl : Transition {
                 changeNothing()
         }
 
-    private fun <A> Elector.perform(action: Action<A>): Pair<Node, List<Reaction<A>>> =
+    private fun <A> Elector.perform(action: Action<A>): TransitionResult<A> =
         when (action) {
             is TimeOut ->
                 when {
@@ -86,7 +87,7 @@ class TransitionImpl : Transition {
                 changeNothing()
         }
 
-    private fun <A> Node.stepDown(action: Action<A>): Pair<Node, List<Reaction<A>>> =
+    private fun <A> Node.stepDown(action: Action<A>): TransitionResult<A> =
         this.becomeElector().changeTerm(action.term) to when (this) {
             is Leader ->
                 listOf(ArmElectionTimeout())
