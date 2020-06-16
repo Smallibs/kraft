@@ -7,7 +7,10 @@ import io.smallibs.kraft.election.impl.TransitionImpl
 
 interface Transition {
 
-    infix fun <A> Node.perform(action: Action<A>): Pair<Node, List<Reaction<A>>>
+    fun <A> Node.perform(
+        hasNotLeaderCompleteness: (Action<A>) -> Boolean,
+        action: Action<A>
+    ): Pair<Node, List<Reaction<A>>>
 
     companion object {
         fun <R> run(block: Transition.() -> R): R = Transition().run(block)

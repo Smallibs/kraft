@@ -5,6 +5,11 @@ import io.smallibs.kraft.common.Term
 
 sealed class Node(open val context: Context) {
 
+    val self: Identifier get() = context.self
+    val numberOfNodes: Int get() = context.numberOfNodes
+    val term: Term get() = context.term
+    val livingNodes: List<Identifier> get() = context.livingNodes
+
     fun becomeElector() = Elector(context)
 
     data class Elector(override val context: Context) : Node(context) {
