@@ -8,6 +8,7 @@ import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node
+import io.smallibs.kraft.election.data.Node.Follower
 import io.smallibs.kraft.election.data.Node.Leader
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.*
@@ -24,6 +25,14 @@ class NodeManagerImpl<A>(
     private val logManager: LogManager<A>,
     private val leaderManager: LeaderManager<A>?
 ) : NodeManager<A> {
+
+    override fun insert(a: A): NodeManager<A> =
+        leaderManager?.let {
+            this(logManager = logManager.append(Entry(behavior.term, a)))
+        } ?: when (behavior) {
+            is Follower -> connector.insert(behavior.leader, a).let { this }
+            else -> this
+        }
 
     override fun accept(action: Action<A>) = Transition.run {
         behavior.perform(::hasNotLeaderCompleteness, action)

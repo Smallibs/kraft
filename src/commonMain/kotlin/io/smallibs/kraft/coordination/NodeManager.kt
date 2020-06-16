@@ -30,6 +30,8 @@ import io.smallibs.kraft.election.data.Action
 
 interface NodeManager<A> {
 
+    fun insert(a: A) : NodeManager<A>
+
     fun accept(action: Action<A>): NodeManager<A>
 
 }
