@@ -5,15 +5,12 @@ import io.smallibs.kraft.coordination.NodeManager
 import io.smallibs.kraft.coordination.service.Connector
 import io.smallibs.kraft.coordination.service.Database
 import io.smallibs.kraft.election.Transition
-import io.smallibs.kraft.election.data.Action
+import io.smallibs.kraft.election.data.*
 import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.Node
-import io.smallibs.kraft.election.data.Node.Follower
-import io.smallibs.kraft.election.data.Node.Leader
-import io.smallibs.kraft.election.data.Reaction
+import io.smallibs.kraft.election.data.Node.*
 import io.smallibs.kraft.election.data.Reaction.*
-import io.smallibs.kraft.election.data.Timer
 import io.smallibs.kraft.log.LeaderManager
+import io.smallibs.kraft.log.Log
 import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Appended
@@ -131,4 +128,14 @@ class NodeManagerImpl<A>(
                 else -> true
             }
 
+    /**
+     * Companion
+     */
+    companion object {
+
+        operator fun <A> invoke(connector: Connector<A>, database: Database<A>, context: Context, log: Log<A>) =
+                NodeManagerImpl(connector, database, Elector(context), LogManager(log), null)
+                        .execute(listOf(ArmElectionTimeout()))
+
+    }
 }

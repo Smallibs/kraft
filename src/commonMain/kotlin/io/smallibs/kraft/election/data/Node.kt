@@ -2,6 +2,7 @@ package io.smallibs.kraft.election.data
 
 import io.smallibs.kraft.common.Identifier
 import io.smallibs.kraft.common.Term
+import io.smallibs.kraft.common.Term.Companion.term
 
 sealed class Node(open val context: Context) {
 
@@ -11,6 +12,7 @@ sealed class Node(open val context: Context) {
 
     fun becomeElector() = Elector(context)
 
+    // In the initial Spec' an Elector is a Follower without leader
     data class Elector(override val context: Context) : Node(context) {
 
         constructor(
@@ -62,6 +64,13 @@ sealed class Node(open val context: Context) {
                 term: Term,
                 livingNodes: List<Identifier>
         ) : this(Context(self, term, livingNodes))
+
+    }
+
+    companion object {
+
+        operator fun invoke(self: Identifier, livingNodes: List<Identifier>) =
+                Elector(Context(self, 0.term, livingNodes))
 
     }
 
