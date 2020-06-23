@@ -43,7 +43,7 @@ sealed class Reaction<A> {
     }
 
     data class AcceptVote<A>(
-        val candidate: Identifier
+            val candidate: Identifier
     ) : Reaction<A>()
 
     class SynchroniseLog<A> : Reaction<A>() {
@@ -59,11 +59,11 @@ sealed class Reaction<A> {
     }
 
     data class AppendRequested<A>(
-        val requestAppend: RequestAppend<A>
+            val requestAppend: RequestAppend<A>
     ) : Reaction<A>()
 
     data class AppendAccepted<A>(
-        val appendResponse: AppendResponse<A>
+            val appendResponse: AppendResponse<A>
     ) : Reaction<A>()
 
 }

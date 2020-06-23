@@ -4,11 +4,11 @@ import io.smallibs.kraft.common.Identifier
 import io.smallibs.kraft.common.Term
 
 data class Context(
-    val self: Identifier,
-    val term: Term,
-    val livingNodes: List<Identifier>
+        val self: Identifier,
+        val term: Term,
+        val livingNodes: List<Identifier>
 ) {
     fun changeTerm(term: Term) =
-        Context(self, term, livingNodes)
+            Context(self, term, livingNodes)
 }
 

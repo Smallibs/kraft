@@ -26,6 +26,17 @@ class LeaderTransitionTest {
     }
 
     @Test
+    fun `Leader should stay a Leader on RequestVote`() {
+        Transition.run {
+            Leader("A".id, 1.term, listOf("A".id))
+                .perform({ true }, RequestVote<Unit>("A".id, 1.term, 0.index to 0.term))
+        }.let {
+            assertEquals(Leader("A".id, 1.term, listOf("A".id)), it.first)
+            assertEquals(listOf(), it.second)
+        }
+    }
+
+    @Test
     fun `Leader should become an Elector on Action with Younger Term`() {
         Transition.run {
             Leader("A".id, 1.term, listOf("A".id, "B".id, "C".id))

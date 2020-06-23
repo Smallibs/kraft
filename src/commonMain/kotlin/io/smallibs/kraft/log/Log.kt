@@ -1,7 +1,7 @@
 package io.smallibs.kraft.log
 
-import io.smallibs.kraft.common.Index
 import io.smallibs.kraft.common.Entry
+import io.smallibs.kraft.common.Index
 import io.smallibs.kraft.log.impl.LogImpl
 
 /**

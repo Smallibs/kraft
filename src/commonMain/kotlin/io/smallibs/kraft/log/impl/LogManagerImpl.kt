@@ -13,30 +13,30 @@ import io.smallibs.kraft.log.data.Appended
 import kotlin.math.max
 
 class LogManagerImpl<A>(
-    private val log: Log<A>,
-    private val commitIndex: Index,
-    private val lastApplied: Index
+        private val log: Log<A>,
+        private val commitIndex: Index,
+        private val lastApplied: Index
 ) : LogManager<A> {
 
     private operator fun invoke(
-        log: Log<A> = this.log,
-        commitIndex: Index = this.commitIndex,
-        lastApplied: Index = this.lastApplied
+            log: Log<A> = this.log,
+            commitIndex: Index = this.commitIndex,
+            lastApplied: Index = this.lastApplied
     ) =
-        LogManagerImpl(log, commitIndex, lastApplied)
+            LogManagerImpl(log, commitIndex, lastApplied)
 
     override fun logSize() =
-        log.size()
+            log.size()
 
     override fun previous() =
-        max(0, logSize() - 1).index.let {
-            it to termAt(it)
-        }
+            max(0, logSize() - 1).index.let {
+                it to termAt(it)
+            }
 
     override fun last() =
-        logSize().index.let {
-            it to termAt(it)
-        }
+            logSize().index.let {
+                it to termAt(it)
+            }
 
     override fun commitIndex(): Index {
         return commitIndex
@@ -55,45 +55,45 @@ class LogManagerImpl<A>(
     }
 
     override fun append(append: Append<A>) =
-        when {
-            canAppend(append.previous) -> {
-                synchronizeEntries(append.previous.first, append.entries).let {
-                    it.updateCommitIndex(append.leaderCommit)
-                }.let {
-                    it.collectedActionsToApply()
-                }.let {
-                    it.first to Appended.success(last().first, it.second)
+            when {
+                canAppend(append.previous) -> {
+                    synchronizeEntries(append.previous.first, append.entries).let {
+                        it.updateCommitIndex(append.leaderCommit)
+                    }.let {
+                        it.collectedActionsToApply()
+                    }.let {
+                        it.first to Appended.success(last().first, it.second)
+                    }
+                }
+                else -> {
+                    this to Appended.failure(last().first)
                 }
             }
-            else -> {
-                this to Appended.failure(last().first)
-            }
-        }
 
     private fun canAppend(previous: Pair<Index, Term>) =
-        previous.first.value == 0 || previous.first.value <= log.size() && termAt(previous.first) == previous.second
+            previous.first.value == 0 || previous.first.value <= log.size() && termAt(previous.first) == previous.second
 
     private fun synchronizeEntries(previousIndex: Index, entries: List<Entry<A>>) =
-        IntRange(0, entries.size).fold(log) { r, i ->
-            r.synchronizeEntry(previousIndex + 1 + i, entries[i])
-        }.let {
-            this(it)
-        }
+            IntRange(0, entries.size).fold(log) { r, i ->
+                r.synchronizeEntry(previousIndex + 1 + i, entries[i])
+            }.let {
+                this(it)
+            }
 
     private fun <A> Log<A>.synchronizeEntry(index: Index, entry: Entry<A>) =
-        // Is entry already in the log ?
-        when {
-            termAt(index) != entry.term -> this.deleteFrom(index - 1).append(entry)
-            else -> this
-        }
+            // Is entry already in the log ?
+            when {
+                termAt(index) != entry.term -> this.deleteFrom(index - 1).append(entry)
+                else -> this
+            }
 
     private fun updateCommitIndex(leaderCommit: Index) =
-        this(commitIndex = max(this.commitIndex, leaderCommit))
+            this(commitIndex = max(this.commitIndex, leaderCommit))
 
     private fun collectedActionsToApply() =
-        IntRange(lastApplied.value, commitIndex.value).map {
-            log.find(it.index)!!
-        }.let {
-            this(lastApplied = commitIndex) to it
-        }
+            IntRange(lastApplied.value, commitIndex.value).map {
+                log.find(it.index)!!
+            }.let {
+                this(lastApplied = commitIndex) to it
+            }
 }

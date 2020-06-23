@@ -1,6 +1,7 @@
 package io.smallibs.kraft.common
 
 import kotlin.math.max
+import kotlin.math.min
 
 data class Index internal constructor(val value: Int) {
 
@@ -11,6 +12,7 @@ data class Index internal constructor(val value: Int) {
     companion object {
         val Int.index get() = Index(this)
         fun max(v: Index, w: Index) = max(v.value, w.value).index
+        fun min(v: Index, w: Index) = min(v.value, w.value).index
     }
 
 }
