@@ -1,6 +1,8 @@
 package io.smallibs.kraft.coordination.impl
 
 import io.smallibs.kraft.common.Entry
+import io.smallibs.kraft.common.Insert.Item
+import io.smallibs.kraft.common.Insert.Mark
 import io.smallibs.kraft.coordination.NodeManager
 import io.smallibs.kraft.coordination.service.Connector
 import io.smallibs.kraft.coordination.service.Database
@@ -25,7 +27,7 @@ class NodeManagerImpl<A>(
 
     override fun insert(a: A): NodeManager<A> =
             leaderManager?.let {
-                this(leaderManager = it.accept(Entry(behavior.term, a)))
+                this(leaderManager = it.accept(Entry(behavior.term, Item(a))))
             } ?: when (behavior) {
                 is Follower -> connector.insert(behavior.leader, a).let { this }
                 else -> this
@@ -70,7 +72,7 @@ class NodeManagerImpl<A>(
 
     private fun insertMarkInLog() =
             leaderManager?.let {
-                this(leaderManager = it.accept(Entry(behavior.term, null)))
+                this(leaderManager = it.accept(Entry(behavior.term)))
             } ?: this
 
     private fun synchroniseLog() =
@@ -118,7 +120,10 @@ class NodeManagerImpl<A>(
 
     private fun executeLog(entries: List<Entry<A>>) =
             entries.map { it.value }.fold(database) { database, a ->
-                a?.let { database.accept(it) } ?: database
+                when (a) {
+                    is Item -> database.accept(a.value)
+                    is Mark -> database
+                }
             }.let {
                 this(database = it)
             }
