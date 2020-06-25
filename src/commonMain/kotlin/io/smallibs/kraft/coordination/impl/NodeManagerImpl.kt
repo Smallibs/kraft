@@ -32,7 +32,7 @@ class NodeManagerImpl<A>(
             }
 
     override fun accept(action: Action<A>) = Transition.run {
-        behavior.perform(::hasLeaderCompleteness, action)
+        behavior.perform(::hasUpToDateLog, action)
     }.let {
         this(it.first, leaderManager = mayBeLeaderManager).execute(it.second)
     }
@@ -123,7 +123,7 @@ class NodeManagerImpl<A>(
                 this(database = it)
             }
 
-    private fun hasLeaderCompleteness(action: Action<A>): Boolean =
+    private fun hasUpToDateLog(action: Action<A>): Boolean =
             when (action) {
                 is RequestVote -> {
                     val log = logManager.last()
