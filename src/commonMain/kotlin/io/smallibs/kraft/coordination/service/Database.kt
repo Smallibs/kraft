@@ -4,4 +4,6 @@ interface Database<A> {
 
     fun accept(a: A): Database<A>
 
+    fun snapshot(): A
+
 }
