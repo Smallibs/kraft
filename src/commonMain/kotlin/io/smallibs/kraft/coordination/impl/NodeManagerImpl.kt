@@ -24,12 +24,12 @@ class NodeManagerImpl<A>(
 ) : NodeManager<A> {
 
     override fun insert(a: A): NodeManager<A> =
-            mayBeLeaderManager?.let {
+            leaderManager?.let {
                 this(leaderManager = it.accept(Entry(behavior.term, a)))
             } ?: when (behavior) {
                 is Follower -> connector.insert(behavior.leader, a).let { this }
                 else -> this
-            }(leaderManager = null)
+            }
 
     override fun accept(action: Action<A>) = Transition.run {
         behavior.perform(::hasLeaderCompleteness, action)
@@ -44,6 +44,7 @@ class NodeManagerImpl<A>(
                     is ArmHeartbeatTimeout -> coordination.armTimeout(Timer.Heartbeat)
                     is StartElection -> coordination.startElection()
                     is AcceptVote -> coordination.acceptVote()
+                    is InsertMarkInLog -> coordination.insertMarkInLog()
                     is SynchroniseLog -> coordination.synchroniseLog()
                     is AppendRequested -> coordination.appendRequest(action.requestAppend)
                     is AppendAccepted -> coordination.appendAccepted(action.appendResponse)
@@ -66,6 +67,11 @@ class NodeManagerImpl<A>(
             connector.acceptVote(
                     behavior.self, behavior.term
             ).let { this }
+
+    private fun insertMarkInLog() =
+            leaderManager?.let {
+                this(leaderManager = it.accept(Entry(behavior.term, null)))
+            } ?: this
 
     private fun synchroniseLog() =
             leaderManager?.prepareAppend()?.forEach {
@@ -112,7 +118,7 @@ class NodeManagerImpl<A>(
 
     private fun executeLog(entries: List<Entry<A>>) =
             entries.map { it.value }.fold(database) { database, a ->
-                database.accept(a)
+                a?.let { database.accept(it) } ?: database
             }.let {
                 this(database = it)
             }

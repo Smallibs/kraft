@@ -1,9 +1,8 @@
-package io.smallibs.kraft.election.impl
+package io.smallibs.kraft.election
 
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node.*
 import io.smallibs.kraft.election.data.Reaction.*
@@ -31,7 +30,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("A".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id)), it.first)
-            assertEquals(listOf(SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
         }
     }
 
@@ -54,7 +53,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("B".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
         }
     }
 

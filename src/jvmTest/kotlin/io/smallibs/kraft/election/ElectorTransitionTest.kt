@@ -1,12 +1,10 @@
-package io.smallibs.kraft.election.impl
+package io.smallibs.kraft.election
 
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node.*
-import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.Timer
 import org.junit.Test

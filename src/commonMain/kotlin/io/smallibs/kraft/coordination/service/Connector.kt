@@ -9,7 +9,7 @@ import io.smallibs.kraft.election.data.Timer
 
 interface Connector<A> {
 
-    fun insert(leader: Identifier, action: A)
+    fun insert(leader: Identifier, action: A?)
 
     fun scheduleTimeOut(timer: Timer)
 

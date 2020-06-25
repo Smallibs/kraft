@@ -65,7 +65,7 @@ class TransitionImpl : Transition {
                     }
                 is Voted ->
                     when {
-                        winElection() -> this.becomeLeader() to listOf(SynchroniseLog(), ArmHeartbeatTimeout())
+                        winElection() -> this.becomeLeader() to listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout())
                         else -> this.stayCandidate(action.follower) to listOf()
                     }
                 else ->

@@ -6,6 +6,10 @@ import io.smallibs.kraft.election.data.Action.RequestAppend
 
 sealed class Reaction<A> {
 
+    // ----------------------------------------------------------------------------
+    // Reactions related to vote management
+    // ----------------------------------------------------------------------------
+
     class ArmElectionTimeout<A> : Reaction<A>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -45,6 +49,22 @@ sealed class Reaction<A> {
     data class AcceptVote<A>(
             val candidate: Identifier
     ) : Reaction<A>()
+
+    // ----------------------------------------------------------------------------
+    // Reactions related to log management
+    // ----------------------------------------------------------------------------
+
+    class InsertMarkInLog<A> : Reaction<A>() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return this::class.hashCode()
+        }
+    }
 
     class SynchroniseLog<A> : Reaction<A>() {
         override fun equals(other: Any?): Boolean {
