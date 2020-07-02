@@ -9,7 +9,7 @@ typealias TransitionResult<A> = Pair<Node, List<Reaction<A>>>
 
 interface Transition {
 
-    fun <A> Node.perform(hasLeaderCompleteness: (Action<A>) -> Boolean, action: Action<A>): TransitionResult<A>
+    fun <A> Node.perform(hasUpToDateLog: (Action<A>) -> Boolean, action: Action<A>): TransitionResult<A>
 
     companion object {
         fun <A> run(block: Transition.() -> TransitionResult<A>) = TransitionImpl().run(block)
