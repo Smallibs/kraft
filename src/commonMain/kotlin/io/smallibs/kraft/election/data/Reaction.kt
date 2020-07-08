@@ -4,13 +4,13 @@ import io.smallibs.kraft.common.Identifier
 import io.smallibs.kraft.election.data.Action.AppendResponse
 import io.smallibs.kraft.election.data.Action.RequestAppend
 
-sealed class Reaction<A> {
+sealed class Reaction<Command> {
 
     // ----------------------------------------------------------------------------
     // Reactions related to vote management
     // ----------------------------------------------------------------------------
 
-    class ArmElectionTimeout<A> : Reaction<A>() {
+    class ArmElectionTimeout<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null || this::class != other::class) return false
@@ -22,7 +22,7 @@ sealed class Reaction<A> {
         }
     }
 
-    class ArmHeartbeatTimeout<A> : Reaction<A>() {
+    class ArmHeartbeatTimeout<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null || this::class != other::class) return false
@@ -34,7 +34,7 @@ sealed class Reaction<A> {
         }
     }
 
-    class StartElection<A> : Reaction<A>() {
+    class StartElection<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null || this::class != other::class) return false
@@ -46,15 +46,15 @@ sealed class Reaction<A> {
         }
     }
 
-    data class AcceptVote<A>(
+    data class AcceptVote<Command>(
             val candidate: Identifier
-    ) : Reaction<A>()
+    ) : Reaction<Command>()
 
     // ----------------------------------------------------------------------------
     // Reactions related to log management
     // ----------------------------------------------------------------------------
 
-    class InsertMarkInLog<A> : Reaction<A>() {
+    class InsertMarkInLog<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null || this::class != other::class) return false
@@ -66,7 +66,7 @@ sealed class Reaction<A> {
         }
     }
 
-    class SynchroniseLog<A> : Reaction<A>() {
+    class SynchroniseLog<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null || this::class != other::class) return false
@@ -78,12 +78,12 @@ sealed class Reaction<A> {
         }
     }
 
-    data class AppendRequested<A>(
-            val requestAppend: RequestAppend<A>
-    ) : Reaction<A>()
+    data class AppendRequested<Command>(
+            val requestAppend: RequestAppend<Command>
+    ) : Reaction<Command>()
 
-    data class AppendAccepted<A>(
-            val appendResponse: AppendResponse<A>
-    ) : Reaction<A>()
+    data class AppendAccepted<Command>(
+            val appendResponse: AppendResponse<Command>
+    ) : Reaction<Command>()
 
 }

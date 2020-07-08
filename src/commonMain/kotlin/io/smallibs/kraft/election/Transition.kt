@@ -5,13 +5,13 @@ import io.smallibs.kraft.election.data.Node
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.impl.TransitionImpl
 
-typealias TransitionResult<A> = Pair<Node, List<Reaction<A>>>
+typealias TransitionResult<Command> = Pair<Node, List<Reaction<Command>>>
 
 interface Transition {
 
-    fun <A> Node.perform(hasUpToDateLog: (Action<A>) -> Boolean, action: Action<A>): TransitionResult<A>
+    fun <Command> Node.perform(hasUpToDateLog: (Action<Command>) -> Boolean, action: Action<Command>): TransitionResult<Command>
 
     companion object {
-        fun <A> run(block: Transition.() -> TransitionResult<A>) = TransitionImpl().run(block)
+        fun <Command> run(block: Transition.() -> TransitionResult<Command>) = TransitionImpl().run(block)
     }
 }

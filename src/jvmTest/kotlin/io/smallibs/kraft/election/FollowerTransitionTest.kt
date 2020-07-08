@@ -8,7 +8,7 @@ import io.smallibs.kraft.election.data.Node.Elector
 import io.smallibs.kraft.election.data.Node.Follower
 import io.smallibs.kraft.election.data.Reaction.AppendRequested
 import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
-import io.smallibs.kraft.election.data.Timer.Election
+import io.smallibs.kraft.election.data.TimoutType.Election
 import org.junit.Test
 import kotlin.test.assertEquals
 

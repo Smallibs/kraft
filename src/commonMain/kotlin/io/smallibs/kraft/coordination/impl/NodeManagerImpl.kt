@@ -5,7 +5,7 @@ import io.smallibs.kraft.common.Insert.Item
 import io.smallibs.kraft.common.Insert.Mark
 import io.smallibs.kraft.coordination.NodeManager
 import io.smallibs.kraft.coordination.service.Connector
-import io.smallibs.kraft.coordination.service.Database
+import io.smallibs.kraft.coordination.service.Executor
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.*
 import io.smallibs.kraft.election.data.Action.*
@@ -17,15 +17,15 @@ import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Appended
 
-class NodeManagerImpl<A>(
-        private val connector: Connector<A>,
-        private val database: Database<A>,
+class NodeManagerImpl<Command>(
+        private val connector: Connector<Command>,
+        private val executor: Executor<Command>,
         private val behavior: Node,
-        private val logManager: LogManager<A>,
-        private val leaderManager: LeaderManager<A>?
-) : NodeManager<A> {
+        private val logManager: LogManager<Command>,
+        private val leaderManager: LeaderManager<Command>?
+) : NodeManager<Command> {
 
-    override fun insert(a: A): NodeManager<A> =
+    override fun insert(a: Command): NodeManager<Command> =
             leaderManager?.let {
                 this(leaderManager = it.accept(Entry(behavior.term, Item(a))))
             } ?: when (behavior) {
@@ -33,17 +33,17 @@ class NodeManagerImpl<A>(
                 else -> this
             }
 
-    override fun accept(action: Action<A>) = Transition.run {
+    override fun accept(action: Action<Command>) = Transition.run {
         behavior.perform(::hasUpToDateLog, action)
     }.let {
         this(it.first, leaderManager = mayBeLeaderManager).execute(it.second)
     }
 
-    private fun execute(reactions: List<Reaction<A>>) =
+    private fun execute(reactions: List<Reaction<Command>>) =
             reactions.fold(this) { coordination, action ->
                 when (action) {
-                    is ArmElectionTimeout -> coordination.armTimeout(Timer.Election)
-                    is ArmHeartbeatTimeout -> coordination.armTimeout(Timer.Heartbeat)
+                    is ArmElectionTimeout -> coordination.armTimeout(TimoutType.Election)
+                    is ArmHeartbeatTimeout -> coordination.armTimeout(TimoutType.Heartbeat)
                     is StartElection -> coordination.startElection()
                     is AcceptVote -> coordination.acceptVote()
                     is InsertMarkInLog -> coordination.insertMarkInLog()
@@ -55,9 +55,9 @@ class NodeManagerImpl<A>(
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    private fun armTimeout(timer: Timer) =
+    private fun armTimeout(timoutType: TimoutType) =
             connector.scheduleTimeOut(
-                    timer
+                    timoutType
             ).let { this }
 
     private fun startElection() =
@@ -80,7 +80,7 @@ class NodeManagerImpl<A>(
                 connector.appendEntries(it.key, requestAppend(it.value))
             }.let { this }
 
-    private fun appendRequest(requestAppend: RequestAppend<A>) =
+    private fun appendRequest(requestAppend: RequestAppend<Command>) =
             logManager.append(
                     Append(requestAppend.previous, requestAppend.leaderCommit, requestAppend.entries)
             ).let {
@@ -92,19 +92,19 @@ class NodeManagerImpl<A>(
 
     private operator fun invoke(
             behavior: Node = this.behavior,
-            database: Database<A> = this.database,
-            logManager: LogManager<A> = this.logManager,
-            leaderManager: LeaderManager<A>? = this.leaderManager
+            executor: Executor<Command> = this.executor,
+            logManager: LogManager<Command> = this.logManager,
+            leaderManager: LeaderManager<Command>? = this.leaderManager
     ) =
-            NodeManagerImpl(connector, database, behavior, logManager, leaderManager)
+            NodeManagerImpl(connector, executor, behavior, logManager, leaderManager)
 
-    private val mayBeLeaderManager: LeaderManager<A>?
+    private val mayBeLeaderManager: LeaderManager<Command>?
         get() = when (behavior) {
             is Leader -> leaderManager ?: LeaderManager(behavior.self, logManager, behavior.livingNodes)
             else -> leaderManager
         }
 
-    private fun appendAccepted(response: AppendResponse<A>) =
+    private fun appendAccepted(response: AppendResponse<Command>) =
             when {
                 response.success -> leaderManager?.appended(response.follower, response.matchIndex)
                 else -> leaderManager?.rejected(response.follower)
@@ -112,23 +112,23 @@ class NodeManagerImpl<A>(
                 executeLog(it.second)(leaderManager = it.first)
             } ?: this
 
-    private fun requestAppend(value: Append<A>) =
+    private fun requestAppend(value: Append<Command>) =
             RequestAppend(behavior.self, behavior.term, value.previous, value.leaderCommit, value.entries)
 
-    private fun appendResponse(requestAppend: RequestAppend<A>, it: Pair<LogManager<A>, Appended<A>>) =
-            AppendResponse<A>(behavior.self, requestAppend.term, true, it.second.matchIndex)
+    private fun appendResponse(requestAppend: RequestAppend<Command>, it: Pair<LogManager<Command>, Appended<Command>>) =
+            AppendResponse<Command>(behavior.self, requestAppend.term, true, it.second.matchIndex)
 
-    private fun executeLog(entries: List<Entry<A>>) =
-            entries.map { it.value }.fold(database) { database, a ->
+    private fun executeLog(entries: List<Entry<Command>>) =
+            entries.map { it.value }.fold(executor) { database, a ->
                 when (a) {
                     is Item -> database.accept(a.value)
                     is Mark -> database
                 }
             }.let {
-                this(database = it)
+                this(executor = it)
             }
 
-    private fun hasUpToDateLog(action: Action<A>): Boolean =
+    private fun hasUpToDateLog(action: Action<Command>): Boolean =
             when (action) {
                 is RequestVote -> {
                     val log = logManager.last()
@@ -144,8 +144,8 @@ class NodeManagerImpl<A>(
      */
     companion object {
 
-        operator fun <A> invoke(connector: Connector<A>, database: Database<A>, context: Context, log: Log<A>) =
-                NodeManagerImpl(connector, database, Elector(context), LogManager(log), null)
+        operator fun <Command> invoke(connector: Connector<Command>, executor: Executor<Command>, context: Context, log: Log<Command>) =
+                NodeManagerImpl(connector, executor, Elector(context), LogManager(log), null)
                         .execute(listOf(ArmElectionTimeout()))
 
     }

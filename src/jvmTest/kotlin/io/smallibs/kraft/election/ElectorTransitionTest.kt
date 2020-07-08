@@ -6,7 +6,7 @@ import io.smallibs.kraft.common.Term.Companion.term
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.Node.*
 import io.smallibs.kraft.election.data.Reaction.*
-import io.smallibs.kraft.election.data.Timer
+import io.smallibs.kraft.election.data.TimoutType
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -16,7 +16,7 @@ class ElectorTransitionTest {
     fun `Elector become a Candidate on timeout`() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id))
-                .perform({ true }, TimeOut<Unit>(Timer.Election, 1.term))
+                .perform({ true }, TimeOut<Unit>(TimoutType.Election, 1.term))
         }.let {
             assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
             assertEquals(listOf(AcceptVote("A".id), StartElection(), ArmElectionTimeout()), it.second)

@@ -4,23 +4,23 @@ import io.smallibs.kraft.common.Entry
 import io.smallibs.kraft.common.Index
 import io.smallibs.kraft.log.Log
 
-class LogImpl<A>(
-        private val value: List<Entry<A>>
-) : Log<A> {
+class LogImpl<Command>(
+        private val value: List<Entry<Command>>
+) : Log<Command> {
 
-    private operator fun invoke(value: List<Entry<A>>) =
+    private operator fun invoke(value: List<Entry<Command>>) =
             LogImpl(value)
 
     override fun size() =
             value.size
 
-    override fun append(entry: Entry<A>) =
+    override fun append(entry: Entry<Command>) =
             this(value + entry)
 
     override fun getFrom(index: Index, size: Int) =
             value.subList(index.value, minOf(index.value + size, value.size) - 1)
 
-    override fun deleteFrom(index: Index): Log<A> =
+    override fun deleteFrom(index: Index): Log<Command> =
             if (index.value < 1) {
                 this(listOf())
             } else {

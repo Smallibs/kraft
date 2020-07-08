@@ -39,7 +39,7 @@ sealed class Node(open val context: Context) {
 
         fun becomeLeader() = Leader(context)
 
-        fun stayCandidate(follower: Identifier) = Candidate(context, followers + follower)
+        fun stayCandidateWithNewFollower(follower: Identifier) = Candidate(context, followers + follower)
     }
 
     data class Follower(override val context: Context, val leader: Identifier, val extended: Boolean) : Node(context) {
@@ -52,7 +52,7 @@ sealed class Node(open val context: Context) {
                 extended: Boolean = false
         ) : this(Context(self, term, livingNodes), leader, extended)
 
-        fun extendTime() = Follower(context, leader, true)
+        fun extendTimeout() = Follower(context, leader, true)
 
         fun resetTime() = Follower(context, leader, false)
     }

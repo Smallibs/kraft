@@ -8,12 +8,12 @@ import io.smallibs.kraft.election.data.Node
 import io.smallibs.kraft.election.data.Node.*
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.*
-import io.smallibs.kraft.election.data.Timer.Election
-import io.smallibs.kraft.election.data.Timer.Heartbeat
+import io.smallibs.kraft.election.data.TimoutType.Election
+import io.smallibs.kraft.election.data.TimoutType.Heartbeat
 
 class TransitionImpl : Transition {
 
-    override fun <A> Node.perform(hasUpToDateLog: (Action<A>) -> Boolean, action: Action<A>) =
+    override fun <Command> Node.perform(hasUpToDateLog: (Action<Command>) -> Boolean, action: Action<Command>) =
             when {
                 isOlderTerm(action) -> this.changeNothing()
                 isYoungerTerm(action) -> this.stepDown(action)
@@ -29,11 +29,11 @@ class TransitionImpl : Transition {
 
     // Second level
 
-    private fun <A> Leader.perform(action: Action<A>): TransitionResult<A> =
+    private fun <Command> Leader.perform(action: Action<Command>): TransitionResult<Command> =
             when (action) {
                 is TimeOut ->
                     when {
-                        action.timer != Heartbeat -> changeNothing()
+                        action.timoutType != Heartbeat -> changeNothing()
                         else -> this to listOf(SynchroniseLog(), ArmHeartbeatTimeout())
                     }
                 is AppendResponse ->
@@ -42,50 +42,50 @@ class TransitionImpl : Transition {
                     changeNothing()
             }
 
-    private fun <A> Follower.perform(action: Action<A>): TransitionResult<A> =
+    private fun <Command> Follower.perform(action: Action<Command>): TransitionResult<Command> =
             when (action) {
                 is TimeOut ->
                     when {
-                        action.timer != Election -> changeNothing()
+                        action.timoutType != Election -> changeNothing()
                         extended -> this.resetTime() to listOf(ArmElectionTimeout())
                         else -> this.becomeElector() to listOf(ArmElectionTimeout())
                     }
-                is RequestAppend<A> ->
-                    this.extendTime() to listOf(AppendRequested(action))
+                is RequestAppend<Command> ->
+                    this.extendTimeout() to listOf(AppendRequested(action))
                 else ->
                     changeNothing()
             }
 
-    private fun <A> Candidate.perform(action: Action<A>): TransitionResult<A> =
+    private fun <Command> Candidate.perform(action: Action<Command>): TransitionResult<Command> =
             when (action) {
                 is TimeOut ->
                     when {
-                        action.timer != Election -> changeNothing()
+                        action.timoutType != Election -> changeNothing()
                         else -> this.becomeElector().becomeCandidate() to listOf(StartElection(), ArmElectionTimeout())
                     }
                 is Voted ->
                     when {
-                        winElection() -> this.becomeLeader() to listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout())
-                        else -> this.stayCandidate(action.follower) to listOf()
+                        hasWinElection() -> this.becomeLeader() to listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout())
+                        else -> this.stayCandidateWithNewFollower(action.follower) to listOf()
                     }
                 else ->
                     changeNothing()
             }
 
-    private fun <A> Elector.perform(action: Action<A>): TransitionResult<A> =
+    private fun <Command> Elector.perform(action: Action<Command>): TransitionResult<Command> =
             when (action) {
                 is TimeOut ->
                     when {
-                        action.timer != Election -> changeNothing()
+                        action.timoutType != Election -> changeNothing()
                         else -> this.becomeCandidate() to listOf(AcceptVote(self), StartElection(), ArmElectionTimeout())
                     }
                 is RequestVote ->
-                    this.becomeFollower(action.candidate).extendTime() to listOf(AcceptVote(action.candidate))
+                    this.becomeFollower(action.candidate).extendTimeout() to listOf(AcceptVote(action.candidate))
                 else ->
                     changeNothing()
             }
 
-    private fun <A> Node.stepDown(action: Action<A>): TransitionResult<A> =
+    private fun <Command> Node.stepDown(action: Action<Command>): TransitionResult<Command> =
             this.becomeElector().changeTerm(action.term) to when (this) {
                 is Leader ->
                     listOf(ArmElectionTimeout())
@@ -93,12 +93,12 @@ class TransitionImpl : Transition {
                     listOf()
             }
 
-    private fun <A> Node.changeNothing() = this to listOf<Reaction<A>>()
+    private fun <Command> Node.changeNothing() = this to listOf<Reaction<Command>>()
 
-    private fun Candidate.winElection() = (followers.size + 1) * 2 > livingNodes.size
+    private fun Candidate.hasWinElection() = (followers.size + 1) * 2 > livingNodes.size
 
-    private fun <A> Node.isYoungerTerm(action: Action<A>) = action.term > term
+    private fun <Command> Node.isYoungerTerm(action: Action<Command>) = action.term > term
 
-    private fun <A> Node.isOlderTerm(action: Action<A>) = action.term < term
+    private fun <Command> Node.isOlderTerm(action: Action<Command>) = action.term < term
 
 }

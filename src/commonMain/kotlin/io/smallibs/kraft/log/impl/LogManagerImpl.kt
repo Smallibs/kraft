@@ -12,14 +12,14 @@ import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Appended
 import kotlin.math.max
 
-class LogManagerImpl<A>(
-        private val log: Log<A>,
+class LogManagerImpl<Command>(
+        private val log: Log<Command>,
         private val commitIndex: Index,
         private val lastApplied: Index
-) : LogManager<A> {
+) : LogManager<Command> {
 
     private operator fun invoke(
-            log: Log<A> = this.log,
+            log: Log<Command> = this.log,
             commitIndex: Index = this.commitIndex,
             lastApplied: Index = this.lastApplied
     ) =
@@ -46,15 +46,15 @@ class LogManagerImpl<A>(
         return log.find(index - 1)?.term ?: 0.term
     }
 
-    override fun append(entry: Entry<A>): LogManager<A> {
+    override fun append(entry: Entry<Command>): LogManager<Command> {
         return this(log.append(entry))
     }
 
-    override fun entriesFrom(index: Index, size: Int): List<Entry<A>> {
+    override fun entriesFrom(index: Index, size: Int): List<Entry<Command>> {
         return log.getFrom(index, size)
     }
 
-    override fun append(append: Append<A>) =
+    override fun append(append: Append<Command>) =
             when {
                 canAppend(append.previous) -> {
                     synchronizeEntries(append.previous.first, append.entries).let {
@@ -73,14 +73,14 @@ class LogManagerImpl<A>(
     private fun canAppend(previous: Pair<Index, Term>) =
             previous.first.value == 0 || previous.first.value <= log.size() && termAt(previous.first) == previous.second
 
-    private fun synchronizeEntries(previousIndex: Index, entries: List<Entry<A>>) =
+    private fun synchronizeEntries(previousIndex: Index, entries: List<Entry<Command>>) =
             IntRange(0, entries.size).fold(log) { r, i ->
                 r.synchronizeEntry(previousIndex + 1 + i, entries[i])
             }.let {
                 this(it)
             }
 
-    private fun <A> Log<A>.synchronizeEntry(index: Index, entry: Entry<A>) =
+    private fun <Command> Log<Command>.synchronizeEntry(index: Index, entry: Entry<Command>) =
             // Is entry already in the log ?
             when {
                 termAt(index) != entry.term -> this.deleteFrom(index - 1).append(entry)

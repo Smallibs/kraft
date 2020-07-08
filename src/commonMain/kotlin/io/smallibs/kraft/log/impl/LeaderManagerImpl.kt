@@ -12,12 +12,12 @@ import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Indexes
 
-class LeaderManagerImpl<A>(
-        private val logManager: LogManager<A>,
+class LeaderManagerImpl<Command>(
+        private val logManager: LogManager<Command>,
         private val indexes: Map<Identifier, Indexes>
-) : LeaderManager<A> {
+) : LeaderManager<Command> {
 
-    override fun accept(entry: Entry<A>) =
+    override fun accept(entry: Entry<Command>) =
             LeaderManagerImpl(logManager.append(entry), indexes)
 
     override fun prepareAppend() =
@@ -41,13 +41,13 @@ class LeaderManagerImpl<A>(
                 LeaderManagerImpl(logManager, indexes + (node to it))
             }
 
-    override fun updateCommitIndex(): Pair<LeaderManager<A>, List<Entry<A>>> = run {
+    override fun updateCommitIndex(): Pair<LeaderManager<Command>, List<Entry<Command>>> = run {
         this.logManager.append(commit(commitIndex())).let {
             LeaderManagerImpl(it.first, indexes) to it.second.entries
         }
     }
 
-    private fun prepareAppend(indexes: Indexes): Append<A> = run {
+    private fun prepareAppend(indexes: Indexes): Append<Command> = run {
         val previous = indexes.next - 1
         val term = logManager.termAt(previous)
         val size = messageSize(indexes, previous)
@@ -79,7 +79,7 @@ class LeaderManagerImpl<A>(
             }
 
 
-    private fun commit(commit: Index): Append<A> =
+    private fun commit(commit: Index): Append<Command> =
             max(logManager.commitIndex(), commit).let {
                 Append(logManager.previous(), it, listOf())
             }

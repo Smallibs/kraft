@@ -8,20 +8,20 @@ import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Indexes
 import io.smallibs.kraft.log.impl.LeaderManagerImpl
 
-interface LeaderManager<A> {
+interface LeaderManager<Command> {
 
-    fun accept(entry: Entry<A>): LeaderManager<A>
+    fun accept(entry: Entry<Command>): LeaderManager<Command>
 
-    fun prepareAppend(): Map<Identifier, Append<A>>
+    fun prepareAppend(): Map<Identifier, Append<Command>>
 
-    fun appended(node: Identifier, matchIndex: Index): LeaderManager<A>
+    fun appended(node: Identifier, matchIndex: Index): LeaderManager<Command>
 
-    fun rejected(node: Identifier): LeaderManager<A>
+    fun rejected(node: Identifier): LeaderManager<Command>
 
-    fun updateCommitIndex(): Pair<LeaderManager<A>, List<Entry<A>>>
+    fun updateCommitIndex(): Pair<LeaderManager<Command>, List<Entry<Command>>>
 
     companion object {
-        operator fun <A> invoke(self: Identifier, logManager: LogManager<A>, identifiers: List<Identifier>) =
+        operator fun <Command> invoke(self: Identifier, logManager: LogManager<Command>, identifiers: List<Identifier>) =
                 LeaderManagerImpl(
                         logManager,
                         identifiers
@@ -30,7 +30,7 @@ interface LeaderManager<A> {
                                 .toMap()
                 )
 
-        fun <A> initialIndexes(logManager: LogManager<A>) =
+        fun <Command> initialIndexes(logManager: LogManager<Command>) =
                 Indexes(logManager.previous().first + 1, 0.index)
     }
 }

@@ -8,7 +8,7 @@ import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Appended
 import io.smallibs.kraft.log.impl.LogManagerImpl
 
-interface LogManager<A> {
+interface LogManager<Command> {
 
     fun logSize(): Int
 
@@ -20,13 +20,13 @@ interface LogManager<A> {
 
     fun termAt(index: Index): Term
 
-    fun append(entry: Entry<A>): LogManager<A>
+    fun append(entry: Entry<Command>): LogManager<Command>
 
-    fun entriesFrom(index: Index, size: Int): List<Entry<A>>
+    fun entriesFrom(index: Index, size: Int): List<Entry<Command>>
 
-    fun append(append: Append<A>): Pair<LogManager<A>, Appended<A>>
+    fun append(append: Append<Command>): Pair<LogManager<Command>, Appended<Command>>
 
     companion object {
-        operator fun <A> invoke(log: Log<A>) = LogManagerImpl<A>(log, 0.index, 0.index)
+        operator fun <Command> invoke(log: Log<Command>) = LogManagerImpl<Command>(log, 0.index, 0.index)
     }
 }
