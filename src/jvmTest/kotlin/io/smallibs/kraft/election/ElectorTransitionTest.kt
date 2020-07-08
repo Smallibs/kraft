@@ -4,7 +4,7 @@ import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
 import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.Node.*
+import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.TimoutType
 import org.junit.Test

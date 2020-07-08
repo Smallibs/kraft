@@ -9,7 +9,7 @@ import io.smallibs.kraft.coordination.service.Executor
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.data.*
 import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.Node.*
+import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.log.LeaderManager
 import io.smallibs.kraft.log.Log
@@ -20,9 +20,9 @@ import io.smallibs.kraft.log.data.Appended
 class NodeManagerImpl<Command>(
         private val connector: Connector<Command>,
         private val executor: Executor<Command>,
-        private val behavior: Node,
+        private val behavior: NodeKind,
         private val logManager: LogManager<Command>,
-        private val leaderManager: LeaderManager<Command>?
+        private val leaderManager: LeaderManager<Command>? = null
 ) : NodeManager<Command> {
 
     override fun insert(a: Command): NodeManager<Command> =
@@ -72,7 +72,7 @@ class NodeManagerImpl<Command>(
 
     private fun insertMarkInLog() =
             leaderManager?.let {
-                this(leaderManager = it.accept(Entry(behavior.term)))
+                this(leaderManager = it.accept(Entry(behavior.term, Mark())))
             } ?: this
 
     private fun synchroniseLog() =
@@ -91,7 +91,7 @@ class NodeManagerImpl<Command>(
     // -----------------------------------------------------------------------------------------------------------------
 
     private operator fun invoke(
-            behavior: Node = this.behavior,
+            behavior: NodeKind = this.behavior,
             executor: Executor<Command> = this.executor,
             logManager: LogManager<Command> = this.logManager,
             leaderManager: LeaderManager<Command>? = this.leaderManager
@@ -145,7 +145,7 @@ class NodeManagerImpl<Command>(
     companion object {
 
         operator fun <Command> invoke(connector: Connector<Command>, executor: Executor<Command>, context: Context, log: Log<Command>) =
-                NodeManagerImpl(connector, executor, Elector(context), LogManager(log), null)
+                NodeManagerImpl(connector, executor, Elector(context), LogManager(log))
                         .execute(listOf(ArmElectionTimeout()))
 
     }

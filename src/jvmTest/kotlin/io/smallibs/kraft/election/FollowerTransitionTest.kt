@@ -4,8 +4,8 @@ import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
 import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.Node.Elector
-import io.smallibs.kraft.election.data.Node.Follower
+import io.smallibs.kraft.election.data.NodeKind.Elector
+import io.smallibs.kraft.election.data.NodeKind.Follower
 import io.smallibs.kraft.election.data.Reaction.AppendRequested
 import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
 import io.smallibs.kraft.election.data.TimoutType.Election

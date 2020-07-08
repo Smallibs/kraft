@@ -4,8 +4,8 @@ import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.TransitionResult
 import io.smallibs.kraft.election.data.Action
 import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.Node
-import io.smallibs.kraft.election.data.Node.*
+import io.smallibs.kraft.election.data.NodeKind
+import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.TimoutType.Election
@@ -13,7 +13,7 @@ import io.smallibs.kraft.election.data.TimoutType.Heartbeat
 
 class TransitionImpl : Transition {
 
-    override fun <Command> Node.perform(hasUpToDateLog: (Action<Command>) -> Boolean, action: Action<Command>) =
+    override fun <Command> NodeKind.perform(hasUpToDateLog: (Action<Command>) -> Boolean, action: Action<Command>) =
             when {
                 isOlderTerm(action) -> this.changeNothing()
                 isYoungerTerm(action) -> this.stepDown(action)
@@ -85,20 +85,20 @@ class TransitionImpl : Transition {
                     changeNothing()
             }
 
-    private fun <Command> Node.stepDown(action: Action<Command>): TransitionResult<Command> =
-            this.becomeElector().changeTerm(action.term) to when (this) {
+    private fun <Command> NodeKind.stepDown(action: Action<Command>): TransitionResult<Command> =
+            this.becomeElector(action.term) to when (this) {
                 is Leader ->
                     listOf(ArmElectionTimeout())
                 else ->
                     listOf()
             }
 
-    private fun <Command> Node.changeNothing() = this to listOf<Reaction<Command>>()
+    private fun <Command> NodeKind.changeNothing() = this to listOf<Reaction<Command>>()
 
     private fun Candidate.hasWinElection() = (followers.size + 1) * 2 > livingNodes.size
 
-    private fun <Command> Node.isYoungerTerm(action: Action<Command>) = action.term > term
+    private fun <Command> NodeKind.isYoungerTerm(action: Action<Command>) = action.term > term
 
-    private fun <Command> Node.isOlderTerm(action: Action<Command>) = action.term < term
+    private fun <Command> NodeKind.isOlderTerm(action: Action<Command>) = action.term < term
 
 }

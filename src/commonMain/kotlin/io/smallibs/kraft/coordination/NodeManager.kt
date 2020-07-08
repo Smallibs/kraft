@@ -33,7 +33,7 @@ import io.smallibs.kraft.log.Log
  * </pre>
  *
  */
-interface NodeManager<Command> {
+interface NodeManager< Command> {
 
     /**
      * Method called when a new operation should be performed on the database.
