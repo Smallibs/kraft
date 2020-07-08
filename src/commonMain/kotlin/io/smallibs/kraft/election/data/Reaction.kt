@@ -46,9 +46,7 @@ sealed class Reaction<Command> {
         }
     }
 
-    data class AcceptVote<Command>(
-            val candidate: Identifier
-    ) : Reaction<Command>()
+    data class AcceptVote<Command>(val candidate: Identifier) : Reaction<Command>()
 
     // ----------------------------------------------------------------------------
     // Reactions related to log management
@@ -78,12 +76,8 @@ sealed class Reaction<Command> {
         }
     }
 
-    data class AppendRequested<Command>(
-            val requestAppend: RequestAppend<Command>
-    ) : Reaction<Command>()
+    data class AppendRequested<Command>(val requestAppend: RequestAppend<Command>) : Reaction<Command>()
 
-    data class AppendAccepted<Command>(
-            val appendResponse: AppendResponse<Command>
-    ) : Reaction<Command>()
+    data class AppendAccepted<Command>(val appendResponse: AppendResponse<Command>) : Reaction<Command>()
 
 }
