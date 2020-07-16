@@ -36,7 +36,7 @@ import io.smallibs.kraft.log.Log
 interface NodeManager< Command> {
 
     /**
-     * Method called when a new operation should be performed on the database.
+     * Method called when a new command should be performed on the database.
      */
     fun insert(a: Command): NodeManager<Command>
 
@@ -44,7 +44,6 @@ interface NodeManager< Command> {
      * Method called when an action has been received by the system.
      */
     fun accept(action: Action<Command>): NodeManager<Command>
-
 
     /**
      * Companion
