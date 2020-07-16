@@ -1,6 +1,6 @@
 # kraft
 
-Kotlin Raft consensus
+A Kotlin multiplatform Raft consensus implementation
 
 ##  Node Kind
 
@@ -37,4 +37,20 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
           |        |   | TimeOut | ArmHeartBeatTime SynchronizeLog                         |
           |        +---+                                                                   |
           +--------------------------------------------------------------------------------+
+```
+
+## Work in progress ...
+
+A proof of this implementation should be done.
+
+## License 
+
+```
+                  GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 2.1, February 1999
+
+ Copyright (C) 1991, 1999 Free Software Foundation, Inc.
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
 ```
