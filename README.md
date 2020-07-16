@@ -13,8 +13,10 @@ The NodeKind denotes the behaviors linked to a node. We have:
 - a Follower and
 - a Leader.
 
-Each oriented arrow is defined by a message, a condition if necessary and a set of 
-reactions to be performed by the system.
+Each oriented arrow is defined by:
+- a message, 
+- a condition if necessary and 
+- a set of reactions to be performed by the system.
  
 For instance, when an Elector accepts a RequestVote message it becomes a Follower, and
 an AcceptVote reaction should be performed. This reaction highlights the acceptance to
