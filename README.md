@@ -1,6 +1,9 @@
 # kraft
 
-A Kotlin multiplatform Raft consensus implementation
+A Kotlin multiplatform Raft consensus implementation base on:
+- agnostic network layer
+- event based algorithm i.e. can be used with a actor based approach
+- agnotic database i.e. base on abstract command execution
 
 ##  Node Kind
 
