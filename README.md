@@ -31,14 +31,14 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
           |      |                                                                |        |
           |      |  TimeOut | ArmElectionTimeOut StartElection                    v        |
           |      V                                                             Follower ---+
-          +–+ Candidate <-±                                                       |
+          +–- Candidate <-±                                                       |
  Higher   |      |    |   | TimeOut | ArmElection TimeOut StartElection           +--------+
   Term    |      |    |   | AcceptVote if No Quorum                                        |
           |      |    +---+                                                                |
           |      |                                                                         |
           |      | AcceptVote if Quorum | ArmHeartBeatTime SynchronizeLog InsertMarkInLog  |
           |      V                                                                         |
-          +-+ Leader <-+                                                                   |
+          +-- Leader <-+                                                                   |
           |        |   | TimeOut | ArmHeartBeatTime SynchronizeLog                         |
           |        +---+                                                                   |
           +--------------------------------------------------------------------------------+
