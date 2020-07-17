@@ -46,7 +46,11 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
 
 ## Work in progress ...
 
-A proof of this implementation should be done.
+Things to be done:
+- a proof of this implementation
+- a client insert conforming the specification
+- the log compaction
+- ...
 
 ## License 
 
