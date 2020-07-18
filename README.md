@@ -51,6 +51,7 @@ Things to be done:
 - a proof of this implementation
 - a client `insert` method conforming the specification
 - the log compaction
+- use IO monads for database évolution for instance
 - ...
 
 ## License 
