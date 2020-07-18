@@ -48,7 +48,7 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
 
 Things to be done:
 - a proof of this implementation
-- a client insert conforming the specification
+- a client `insert` method conforming the specification
 - the log compaction
 - ...
 
