@@ -7,7 +7,7 @@ import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.NodeKind.Elector
 import io.smallibs.kraft.election.data.NodeKind.Follower
 import io.smallibs.kraft.election.data.Reaction.AppendRequested
-import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
+import io.smallibs.kraft.election.data.Reaction.ArmTimeout
 import io.smallibs.kraft.election.data.TimoutType.Election
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -21,7 +21,7 @@ class FollowerTransitionTest {
                 .perform({ true }, TimeOut<Unit>(Election, 1.term))
         }.let {
             assertEquals(Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(ArmElectionTimeout()), it.second)
+            assertEquals(listOf(ArmTimeout(Election)), it.second)
         }
     }
 

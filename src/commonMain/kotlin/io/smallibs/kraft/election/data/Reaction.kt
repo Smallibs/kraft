@@ -10,29 +10,7 @@ sealed class Reaction<Command> {
     // Reactions related to vote management
     // ----------------------------------------------------------------------------
 
-    class ArmElectionTimeout<Command> : Reaction<Command>() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return this::class.hashCode()
-        }
-    }
-
-    class ArmHeartbeatTimeout<Command> : Reaction<Command>() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return this::class.hashCode()
-        }
-    }
+    data class ArmTimeout<Command>(val typeOutType: TimoutType) : Reaction<Command>()
 
     class StartElection<Command> : Reaction<Command>() {
         override fun equals(other: Any?): Boolean {

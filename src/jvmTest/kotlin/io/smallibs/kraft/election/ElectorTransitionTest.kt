@@ -7,6 +7,7 @@ import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.TimoutType
+import io.smallibs.kraft.election.data.TimoutType.Election
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -16,10 +17,10 @@ class ElectorTransitionTest {
     fun `Elector become a Candidate on timeout`() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id))
-                .perform({ true }, TimeOut<Unit>(TimoutType.Election, 1.term))
+                .perform({ true }, TimeOut<Unit>(Election, 1.term))
         }.let {
             assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
-            assertEquals(listOf(AcceptVote("A".id), StartElection(), ArmElectionTimeout()), it.second)
+            assertEquals(listOf(AcceptVote("A".id), StartElection(), ArmTimeout(Election)), it.second)
         }
     }
 

@@ -7,6 +7,8 @@ import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.TimoutType
+import io.smallibs.kraft.election.data.TimoutType.Election
+import io.smallibs.kraft.election.data.TimoutType.Heartbeat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -16,10 +18,10 @@ class CandidateTransitionTest {
     fun `Candidate should stay a Candidate on timeout`() {
         Transition.run {
             Candidate("A".id, 1.term, listOf("A".id, "B".id))
-                .perform({ true }, TimeOut<Unit>(TimoutType.Election, 1.term))
+                .perform({ true }, TimeOut<Unit>(Election, 1.term))
         }.let {
             assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
-            assertEquals(listOf(StartElection(), ArmElectionTimeout()), it.second)
+            assertEquals(listOf(StartElection(), ArmTimeout(Election)), it.second)
         }
     }
 
@@ -30,7 +32,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("A".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id)), it.first)
-            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmTimeout(Heartbeat)), it.second)
         }
     }
 
@@ -53,7 +55,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("B".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmTimeout(Heartbeat)), it.second)
         }
     }
 

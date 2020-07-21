@@ -12,16 +12,16 @@ import io.smallibs.kraft.log.LogManager
 import io.smallibs.kraft.log.data.Append
 import io.smallibs.kraft.log.data.Indexes
 
-class LeaderManagerImpl<Command>(
-        private val logManager: LogManager<Command>,
-        private val indexes: Map<Identifier, Indexes>
+data class LeaderManagerImpl<Command>(
+    private val logManager: LogManager<Command>,
+    private val indexes: Map<Identifier, Indexes>
 ) : LeaderManager<Command> {
 
     override fun accept(entry: Entry<Command>) =
-            LeaderManagerImpl(logManager.append(entry), indexes)
+        LeaderManagerImpl(logManager.append(entry), indexes)
 
     override fun prepareAppend() =
-            indexes.map { it.key to prepareAppend(it.value) }.toMap()
+        indexes.map { it.key to prepareAppend(it.value) }.toMap()
 
     override fun appended(node: Identifier, matchIndex: Index) = run {
         val index = this.indexes[node] ?: initialIndexes(this.logManager)
@@ -35,11 +35,11 @@ class LeaderManagerImpl<Command>(
     }
 
     override fun rejected(node: Identifier) =
-            (this.indexes[node] ?: initialIndexes(this.logManager)).let {
-                Indexes(max(1.index, it.next - 1), it.match)
-            }.let {
-                LeaderManagerImpl(logManager, indexes + (node to it))
-            }
+        (this.indexes[node] ?: initialIndexes(this.logManager)).let {
+            Indexes(max(1.index, it.next - 1), it.match)
+        }.let {
+            LeaderManagerImpl(logManager, indexes + (node to it))
+        }
 
     override fun updateCommitIndex(): Pair<LeaderManager<Command>, List<Entry<Command>>> = run {
         this.logManager.append(commit(commitIndex())).let {
@@ -67,20 +67,20 @@ class LeaderManagerImpl<Command>(
     }
 
     private fun commitIndex() =
-            when {
-                indexes.isEmpty() ->
-                    logManager.logSize().index
-                else ->
-                    indexes
-                            .map { it.value.match.value }
-                            .sortedDescending()
-                            .get(this.indexes.size / 2)
-                            .index
-            }
+        when {
+            indexes.isEmpty() ->
+                logManager.logSize().index
+            else ->
+                indexes
+                    .map { it.value.match.value }
+                    .sortedDescending()
+                    .get(this.indexes.size / 2)
+                    .index
+        }
 
 
     private fun commit(commit: Index): Append<Command> =
-            max(logManager.commitIndex(), commit).let {
-                Append(logManager.previous(), it, listOf())
-            }
+        max(logManager.commitIndex(), commit).let {
+            Append(logManager.previous(), it, listOf())
+        }
 }

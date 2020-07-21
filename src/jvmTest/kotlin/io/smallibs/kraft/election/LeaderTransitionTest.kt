@@ -6,8 +6,9 @@ import io.smallibs.kraft.common.Term.Companion.term
 import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.NodeKind.Elector
 import io.smallibs.kraft.election.data.NodeKind.Leader
+import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.AppendAccepted
-import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
+import io.smallibs.kraft.election.data.TimoutType.Election
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -42,7 +43,7 @@ class LeaderTransitionTest {
                 .perform({ true }, RequestVote<Unit>("A".id, 2.term, 0.index to 1.term))
         }.let {
             assertEquals(Elector("A".id, 2.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(ArmElectionTimeout()), it.second)
+            assertEquals(listOf(Reaction.ArmTimeout(Election)), it.second)
         }
     }
 
