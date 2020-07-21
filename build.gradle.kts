@@ -42,6 +42,12 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
+                implementation('io.kotest:kotest-runner-junit5-jvm:4.1.2')
+                implementation('io.kotest:kotest-assertions-core-jvm:4.1.2')
+                implementation('io.kotest:kotest-property-jvm:4.1.2')
+                implementation('io.kotest:kotest-runner-console-jvm:4.1.2')
+                implementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
             }
         }
         val jsMain by getting {
@@ -60,5 +66,8 @@ kotlin {
         macosTest {
         }
         */
+
+        
     }
 }
+

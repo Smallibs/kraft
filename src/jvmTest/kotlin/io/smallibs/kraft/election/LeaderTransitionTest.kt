@@ -8,7 +8,7 @@ import io.smallibs.kraft.election.data.NodeKind.Elector
 import io.smallibs.kraft.election.data.NodeKind.Leader
 import io.smallibs.kraft.election.data.Reaction.AppendAccepted
 import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class LeaderTransitionTest {

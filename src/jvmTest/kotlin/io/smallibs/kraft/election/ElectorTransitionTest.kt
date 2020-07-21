@@ -7,7 +7,7 @@ import io.smallibs.kraft.election.data.Action.*
 import io.smallibs.kraft.election.data.NodeKind.*
 import io.smallibs.kraft.election.data.Reaction.*
 import io.smallibs.kraft.election.data.TimoutType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class ElectorTransitionTest {
