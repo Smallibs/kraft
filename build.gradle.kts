@@ -1,13 +1,12 @@
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.72'
+    kotlin("multiplatform") version "1.3.72"
+    id("maven-publish")
 }
 repositories {
     mavenCentral()
 }
-group 'com.example'
-version '0.0.1'
-
-apply plugin: 'maven-publish'
+group = "com.example"
+version = "0.0.1"
 
 kotlin {
     jvm()
@@ -23,36 +22,36 @@ kotlin {
     // For Windows, should be changed to e.g. mingwX64
     // macosX64("macos")
     sourceSets {
-        commonMain {
+        val commonMain by getting {
             dependencies {
-                implementation kotlin('stdlib-common')
+                implementation(kotlin("stdlib-common"))
             }
         }
-        commonTest {
+        val commonTest by getting {
             dependencies {
-                implementation kotlin('test-common')
-                implementation kotlin('test-annotations-common')
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
             }
         }
-        jvmMain {
+        val jvmMain by getting {
             dependencies {
-                implementation kotlin('stdlib-jdk8')
+                implementation(kotlin("stdlib-jdk8"))
             }
         }
-        jvmTest {
+        val jvmTest by getting {
             dependencies {
-                implementation kotlin('test')
-                implementation kotlin('test-junit')
+                implementation(kotlin("test"))
+                implementation(kotlin("test-junit"))
             }
         }
-        jsMain {
+        val jsMain by getting {
             dependencies {
-                implementation kotlin('stdlib-js')
+                implementation(kotlin("stdlib-js"))
             }
         }
-        jsTest {
+        val jsTest by getting {
             dependencies {
-                implementation kotlin('test-js')
+                implementation(kotlin("test-js"))
             }
         }
         /*
