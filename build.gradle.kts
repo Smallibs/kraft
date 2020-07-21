@@ -5,7 +5,7 @@ plugins {
 repositories {
     mavenCentral()
 }
-group = "com.example"
+group = ""
 version = "0.0.1"
 
 kotlin {
@@ -67,7 +67,9 @@ kotlin {
         }
         */
 
-        
+        tasks.named("jvmTest") {
+            useJUnitPlatform()
+        }
     }
 }
 
