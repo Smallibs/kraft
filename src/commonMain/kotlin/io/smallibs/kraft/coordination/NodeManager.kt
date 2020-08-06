@@ -33,7 +33,7 @@ import io.smallibs.kraft.log.Log
  * </pre>
  *
  */
-interface NodeManager< Command> {
+interface NodeManager<Command> {
 
     /**
      * Method called when a new command should be performed on the database.
@@ -51,8 +51,6 @@ interface NodeManager< Command> {
     companion object {
 
         operator fun <Command> invoke(connector: Connector<Command>, executor: Executor<Command>, context: Context, log: Log<Command>) =
-                NodeManagerImpl(connector, executor, context, log)
-
+            NodeManagerImpl(connector, executor, context, log)
     }
-
 }

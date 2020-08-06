@@ -7,10 +7,24 @@ import io.smallibs.kraft.coordination.NodeManager
 import io.smallibs.kraft.coordination.service.Connector
 import io.smallibs.kraft.coordination.service.Executor
 import io.smallibs.kraft.election.Transition
-import io.smallibs.kraft.election.data.*
-import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.NodeKind.*
-import io.smallibs.kraft.election.data.Reaction.*
+import io.smallibs.kraft.election.data.Action
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Context
+import io.smallibs.kraft.election.data.NodeKind
+import io.smallibs.kraft.election.data.NodeKind.Elector
+import io.smallibs.kraft.election.data.NodeKind.Follower
+import io.smallibs.kraft.election.data.NodeKind.Leader
+import io.smallibs.kraft.election.data.Reaction
+import io.smallibs.kraft.election.data.Reaction.AcceptVote
+import io.smallibs.kraft.election.data.Reaction.AppendAccepted
+import io.smallibs.kraft.election.data.Reaction.AppendRequested
+import io.smallibs.kraft.election.data.Reaction.ArmTimeout
+import io.smallibs.kraft.election.data.Reaction.InsertMarkInLog
+import io.smallibs.kraft.election.data.Reaction.StartElection
+import io.smallibs.kraft.election.data.Reaction.SynchroniseLog
+import io.smallibs.kraft.election.data.TimoutType
 import io.smallibs.kraft.election.data.TimoutType.Election
 import io.smallibs.kraft.log.LeaderManager
 import io.smallibs.kraft.log.Log
@@ -155,6 +169,5 @@ class NodeManagerImpl<Command>(
         ) =
             NodeManagerImpl(connector, executor, Elector(context), LogManager(log))
                 .execute(listOf(ArmTimeout(Election)))
-
     }
 }

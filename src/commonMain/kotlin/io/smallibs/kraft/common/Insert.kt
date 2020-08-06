@@ -15,5 +15,4 @@ sealed class Insert<Command> {
     }
 
     data class Item<Command>(val value: Command) : Insert<Command>()
-
 }

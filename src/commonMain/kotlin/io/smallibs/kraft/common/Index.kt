@@ -14,5 +14,4 @@ data class Index internal constructor(val value: Int) {
         fun max(v: Index, w: Index) = max(v.value, w.value).index
         fun min(v: Index, w: Index) = min(v.value, w.value).index
     }
-
 }

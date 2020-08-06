@@ -12,7 +12,7 @@ object LogArb {
 
     val entryArb = arb { rs ->
         val values = Arb.int().values(rs)
-        var term = 0 // UGLY: Term should always increase | Don't see to Arb can help in such case (for the moment)
+        var term = 0
         values.map { (value) ->
             term += 1
             Entry(term.term, Insert.Item(value))
@@ -26,7 +26,6 @@ object LogArb {
             entries.take(l.value, rs).fold(Log<Int>()) { log, entry ->
                 log.append(entry)
             }
-
         }
     }
 
@@ -35,5 +34,4 @@ object LogArb {
 
         log.map { LogManager(it.value) }
     }
-
 }

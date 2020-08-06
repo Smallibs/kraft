@@ -29,5 +29,4 @@ data class LogImpl<Command>(
 
     override fun find(index: Index) =
         value.elementAtOrNull(index.value)
-
 }

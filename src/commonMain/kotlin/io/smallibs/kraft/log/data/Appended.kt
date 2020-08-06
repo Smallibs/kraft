@@ -16,5 +16,4 @@ data class Appended<Command> private constructor(
         fun <Command> failure(matchIndex: Index) =
             Appended(false, matchIndex, listOf<Entry<Command>>())
     }
-
 }

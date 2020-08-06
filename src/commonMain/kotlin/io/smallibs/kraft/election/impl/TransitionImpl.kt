@@ -3,11 +3,23 @@ package io.smallibs.kraft.election.impl
 import io.smallibs.kraft.election.Transition
 import io.smallibs.kraft.election.TransitionResult
 import io.smallibs.kraft.election.data.Action
-import io.smallibs.kraft.election.data.Action.*
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Action.TimeOut
 import io.smallibs.kraft.election.data.NodeKind
-import io.smallibs.kraft.election.data.NodeKind.*
+import io.smallibs.kraft.election.data.NodeKind.Candidate
+import io.smallibs.kraft.election.data.NodeKind.Elector
+import io.smallibs.kraft.election.data.NodeKind.Follower
+import io.smallibs.kraft.election.data.NodeKind.Leader
 import io.smallibs.kraft.election.data.Reaction
-import io.smallibs.kraft.election.data.Reaction.*
+import io.smallibs.kraft.election.data.Reaction.AcceptVote
+import io.smallibs.kraft.election.data.Reaction.AppendAccepted
+import io.smallibs.kraft.election.data.Reaction.AppendRequested
+import io.smallibs.kraft.election.data.Reaction.ArmTimeout
+import io.smallibs.kraft.election.data.Reaction.InsertMarkInLog
+import io.smallibs.kraft.election.data.Reaction.StartElection
+import io.smallibs.kraft.election.data.Reaction.SynchroniseLog
 import io.smallibs.kraft.election.data.TimoutType.Election
 import io.smallibs.kraft.election.data.TimoutType.Heartbeat
 
@@ -63,7 +75,7 @@ class TransitionImpl : Transition {
                     action.timoutType != Election -> changeNothing()
                     else -> this.becomeElector().becomeCandidate() to listOf(StartElection(), ArmTimeout(Election))
                 }
-            is Voted ->
+            is Action.Voted ->
                 when {
                     hasWinElection() -> this.becomeLeader() to listOf(
                         InsertMarkInLog(),
@@ -104,5 +116,4 @@ class TransitionImpl : Transition {
     private fun <Command> NodeKind.isYoungerTerm(action: Action<Command>) = action.term > term
 
     private fun <Command> NodeKind.isOlderTerm(action: Action<Command>) = action.term < term
-
 }

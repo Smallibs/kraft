@@ -8,6 +8,17 @@ repositories {
 group = "io.smallibs.kraft"
 version = "0.0.1"
 
+buildscript {
+    repositories {
+        maven("https://plugins.gradle.org/m2/")
+    }
+    dependencies {
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:9.3.0")
+    }
+}
+
+apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
 kotlin {
     jvm()
     js {
@@ -60,10 +71,9 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-        
+
         tasks.named<Test>("jvmTest") {
             useJUnitPlatform()
         }
     }
 }
-

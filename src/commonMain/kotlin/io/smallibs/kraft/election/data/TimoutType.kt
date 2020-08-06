@@ -5,5 +5,4 @@ sealed class TimoutType {
     object Heartbeat : TimoutType()
 
     object Election : TimoutType()
-
 }

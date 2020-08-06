@@ -78,7 +78,6 @@ data class LeaderManagerImpl<Command>(
                     .index
         }
 
-
     private fun commit(commit: Index): Append<Command> =
         max(logManager.commitIndex(), commit).let {
             Append(logManager.previous(), it, listOf())

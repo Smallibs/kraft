@@ -52,9 +52,9 @@ sealed class NodeKind(protected open val context: Context) {
     data class Elector(override val context: Context) : NodeKind(context) {
 
         constructor(
-                self: Identifier,
-                term: Term,
-                otherNodes: List<Identifier>
+            self: Identifier,
+            term: Term,
+            otherNodes: List<Identifier>
         ) : this(Context(self, term, otherNodes))
 
         fun becomeFollower(candidate: Identifier) = Follower(context, candidate, false)
@@ -65,10 +65,10 @@ sealed class NodeKind(protected open val context: Context) {
     data class Candidate(override val context: Context, val followers: List<Identifier> = listOf()) : NodeKind(context) {
 
         constructor(
-                self: Identifier,
-                term: Term,
-                livingNodes: List<Identifier>,
-                followers: List<Identifier> = listOf()
+            self: Identifier,
+            term: Term,
+            livingNodes: List<Identifier>,
+            followers: List<Identifier> = listOf()
         ) : this(Context(self, term, livingNodes), followers)
 
         fun becomeLeader() = Leader(context)
@@ -79,11 +79,11 @@ sealed class NodeKind(protected open val context: Context) {
     data class Follower(override val context: Context, val leader: Identifier, val extended: Boolean) : NodeKind(context) {
 
         constructor(
-                self: Identifier,
-                term: Term,
-                livingNodes: List<Identifier>,
-                leader: Identifier,
-                extended: Boolean = false
+            self: Identifier,
+            term: Term,
+            livingNodes: List<Identifier>,
+            leader: Identifier,
+            extended: Boolean = false
         ) : this(Context(self, term, livingNodes), leader, extended)
 
         fun extendTimeout() = Follower(context, leader, true)
@@ -94,16 +94,14 @@ sealed class NodeKind(protected open val context: Context) {
     data class Leader(override val context: Context) : NodeKind(context) {
 
         constructor(
-                self: Identifier,
-                term: Term,
-                livingNodes: List<Identifier>
+            self: Identifier,
+            term: Term,
+            livingNodes: List<Identifier>
         ) : this(Context(self, term, livingNodes))
-
     }
 
     companion object {
         operator fun invoke(self: Identifier, livingNodes: List<Identifier>) =
-                Elector(Context(self, 0.term, livingNodes))
+            Elector(Context(self, 0.term, livingNodes))
     }
-
 }

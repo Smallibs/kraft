@@ -3,7 +3,10 @@ package io.smallibs.kraft.election
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.data.Action.*
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Action.Voted
 import io.smallibs.kraft.election.data.NodeKind.Elector
 import io.smallibs.kraft.election.data.NodeKind.Leader
 import io.smallibs.kraft.election.data.Reaction
@@ -90,5 +93,4 @@ class LeaderTransitionTest {
             assertEquals(listOf(AppendAccepted(AppendResponse<Unit>("B".id, 1.term, true, 1.index))), it.second)
         }
     }
-
 }

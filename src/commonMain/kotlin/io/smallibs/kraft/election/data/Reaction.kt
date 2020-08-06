@@ -57,5 +57,4 @@ sealed class Reaction<Command> {
     data class AppendRequested<Command>(val requestAppend: RequestAppend<Command>) : Reaction<Command>()
 
     data class AppendAccepted<Command>(val appendResponse: AppendResponse<Command>) : Reaction<Command>()
-
 }
