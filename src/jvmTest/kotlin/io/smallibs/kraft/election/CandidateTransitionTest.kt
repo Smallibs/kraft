@@ -3,11 +3,21 @@ package io.smallibs.kraft.election
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.NodeKind.*
-import io.smallibs.kraft.election.data.Reaction.*
-import io.smallibs.kraft.election.data.TimoutType
-import org.junit.Test
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Action.TimeOut
+import io.smallibs.kraft.election.data.Action.Voted
+import io.smallibs.kraft.election.data.NodeKind.Candidate
+import io.smallibs.kraft.election.data.NodeKind.Elector
+import io.smallibs.kraft.election.data.NodeKind.Leader
+import io.smallibs.kraft.election.data.Reaction.ArmTimeout
+import io.smallibs.kraft.election.data.Reaction.InsertMarkInLog
+import io.smallibs.kraft.election.data.Reaction.StartElection
+import io.smallibs.kraft.election.data.Reaction.SynchroniseLog
+import io.smallibs.kraft.election.data.TimoutType.Election
+import io.smallibs.kraft.election.data.TimoutType.Heartbeat
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class CandidateTransitionTest {
@@ -16,10 +26,10 @@ class CandidateTransitionTest {
     fun `Candidate should stay a Candidate on timeout`() {
         Transition.run {
             Candidate("A".id, 1.term, listOf("A".id, "B".id))
-                .perform({ true }, TimeOut<Unit>(TimoutType.Election, 1.term))
+                .perform({ true }, TimeOut<Unit>(Election, 1.term))
         }.let {
             assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
-            assertEquals(listOf(StartElection(), ArmElectionTimeout()), it.second)
+            assertEquals(listOf(StartElection(), ArmTimeout(Election)), it.second)
         }
     }
 
@@ -30,7 +40,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("A".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id)), it.first)
-            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmTimeout(Heartbeat)), it.second)
         }
     }
 
@@ -53,7 +63,7 @@ class CandidateTransitionTest {
                 .perform({ true }, Voted<Unit>("B".id, 1.term))
         }.let {
             assertEquals(Leader("A".id, 1.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmHeartbeatTimeout()), it.second)
+            assertEquals(listOf(InsertMarkInLog(), SynchroniseLog(), ArmTimeout(Heartbeat)), it.second)
         }
     }
 
@@ -111,5 +121,4 @@ class CandidateTransitionTest {
             assertEquals(listOf(), it.second)
         }
     }
-
 }

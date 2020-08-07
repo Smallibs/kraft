@@ -3,11 +3,19 @@ package io.smallibs.kraft.election
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.data.Action.*
-import io.smallibs.kraft.election.data.NodeKind.*
-import io.smallibs.kraft.election.data.Reaction.*
-import io.smallibs.kraft.election.data.TimoutType
-import org.junit.Test
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Action.TimeOut
+import io.smallibs.kraft.election.data.Action.Voted
+import io.smallibs.kraft.election.data.NodeKind.Candidate
+import io.smallibs.kraft.election.data.NodeKind.Elector
+import io.smallibs.kraft.election.data.NodeKind.Follower
+import io.smallibs.kraft.election.data.Reaction.AcceptVote
+import io.smallibs.kraft.election.data.Reaction.ArmTimeout
+import io.smallibs.kraft.election.data.Reaction.StartElection
+import io.smallibs.kraft.election.data.TimoutType.Election
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class ElectorTransitionTest {
@@ -16,10 +24,10 @@ class ElectorTransitionTest {
     fun `Elector become a Candidate on timeout`() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id))
-                .perform({ true }, TimeOut<Unit>(TimoutType.Election, 1.term))
+                .perform({ true }, TimeOut<Unit>(Election, 1.term))
         }.let {
             assertEquals(Candidate("A".id, 2.term, listOf("A".id, "B".id), listOf()), it.first)
-            assertEquals(listOf(AcceptVote("A".id), StartElection(), ArmElectionTimeout()), it.second)
+            assertEquals(listOf(AcceptVote("A".id), StartElection(), ArmTimeout(Election)), it.second)
         }
     }
 
@@ -88,5 +96,4 @@ class ElectorTransitionTest {
             assertEquals(listOf(), it.second)
         }
     }
-
 }

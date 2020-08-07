@@ -22,15 +22,15 @@ interface LeaderManager<Command> {
 
     companion object {
         operator fun <Command> invoke(self: Identifier, logManager: LogManager<Command>, identifiers: List<Identifier>) =
-                LeaderManagerImpl(
-                        logManager,
-                        identifiers
-                                .filter { it != self }
-                                .map { it to initialIndexes(logManager) }
-                                .toMap()
-                )
+            LeaderManagerImpl(
+                logManager,
+                identifiers
+                    .filter { it != self }
+                    .map { it to initialIndexes(logManager) }
+                    .toMap()
+            )
 
         fun <Command> initialIndexes(logManager: LogManager<Command>) =
-                Indexes(logManager.previous().first + 1, 0.index)
+            Indexes(logManager.previous().first + 1, 0.index)
     }
 }

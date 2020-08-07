@@ -10,7 +10,7 @@ import io.smallibs.kraft.election.data.TimoutType
 /**
  * A connector provides functionalities linked with the external world.
  */
-interface Connector< Command> {
+interface Connector<Command> {
 
     fun insert(leader: Identifier, action: Command)
 
@@ -23,5 +23,4 @@ interface Connector< Command> {
     fun appendEntries(follower: Identifier, append: Action.RequestAppend<Command>)
 
     fun appendResult(leader: Identifier, appended: AppendResponse<Command>)
-
 }

@@ -3,12 +3,16 @@ package io.smallibs.kraft.election
 import io.smallibs.kraft.common.Identifier.Companion.id
 import io.smallibs.kraft.common.Index.Companion.index
 import io.smallibs.kraft.common.Term.Companion.term
-import io.smallibs.kraft.election.data.Action.*
+import io.smallibs.kraft.election.data.Action.AppendResponse
+import io.smallibs.kraft.election.data.Action.RequestAppend
+import io.smallibs.kraft.election.data.Action.RequestVote
+import io.smallibs.kraft.election.data.Action.Voted
 import io.smallibs.kraft.election.data.NodeKind.Elector
 import io.smallibs.kraft.election.data.NodeKind.Leader
+import io.smallibs.kraft.election.data.Reaction
 import io.smallibs.kraft.election.data.Reaction.AppendAccepted
-import io.smallibs.kraft.election.data.Reaction.ArmElectionTimeout
-import org.junit.Test
+import io.smallibs.kraft.election.data.TimoutType.Election
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class LeaderTransitionTest {
@@ -42,7 +46,7 @@ class LeaderTransitionTest {
                 .perform({ true }, RequestVote<Unit>("A".id, 2.term, 0.index to 1.term))
         }.let {
             assertEquals(Elector("A".id, 2.term, listOf("A".id, "B".id, "C".id)), it.first)
-            assertEquals(listOf(ArmElectionTimeout()), it.second)
+            assertEquals(listOf(Reaction.ArmTimeout(Election)), it.second)
         }
     }
 
@@ -89,5 +93,4 @@ class LeaderTransitionTest {
             assertEquals(listOf(AppendAccepted(AppendResponse<Unit>("B".id, 1.term, true, 1.index))), it.second)
         }
     }
-
 }

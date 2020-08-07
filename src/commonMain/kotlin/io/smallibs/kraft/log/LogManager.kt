@@ -27,6 +27,6 @@ interface LogManager<Command> {
     fun append(append: Append<Command>): Pair<LogManager<Command>, Appended<Command>>
 
     companion object {
-        operator fun <Command> invoke(log: Log<Command>) = LogManagerImpl<Command>(log, 0.index, 0.index)
+        operator fun <Command> invoke(log: Log<Command>) = LogManagerImpl(log, 0.index, 0.index)
     }
 }
