@@ -49,6 +49,8 @@ sealed class NodeKind(protected open val context: Context) {
 
     fun becomeElector(term: Term = context.term) = Elector(context.changeTerm(term))
 
+    open fun becomeFollower(leader: Identifier) = Follower(context, leader, false)
+
     data class Elector(override val context: Context) : NodeKind(context) {
 
         constructor(
@@ -57,12 +59,11 @@ sealed class NodeKind(protected open val context: Context) {
             otherNodes: List<Identifier>
         ) : this(Context(self, term, otherNodes))
 
-        fun becomeFollower(candidate: Identifier) = Follower(context, candidate, false)
-
         fun becomeCandidate() = Candidate(context.changeTerm(context.term.next()))
     }
 
-    data class Candidate(override val context: Context, val followers: List<Identifier> = listOf()) : NodeKind(context) {
+    data class Candidate(override val context: Context, val followers: List<Identifier> = listOf()) :
+        NodeKind(context) {
 
         constructor(
             self: Identifier,
@@ -76,7 +77,8 @@ sealed class NodeKind(protected open val context: Context) {
         fun stayCandidateWithNewFollower(follower: Identifier) = Candidate(context, followers + follower)
     }
 
-    data class Follower(override val context: Context, val leader: Identifier, val extended: Boolean) : NodeKind(context) {
+    data class Follower(override val context: Context, val leader: Identifier, val extended: Boolean) :
+        NodeKind(context) {
 
         constructor(
             self: Identifier,
@@ -85,6 +87,8 @@ sealed class NodeKind(protected open val context: Context) {
             leader: Identifier,
             extended: Boolean = false
         ) : this(Context(self, term, livingNodes), leader, extended)
+
+        override fun becomeFollower(leader: Identifier) = Follower(context, leader, extended)
 
         fun extendTimeout() = Follower(context, leader, true)
 

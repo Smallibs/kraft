@@ -13,13 +13,13 @@ import io.smallibs.kraft.election.data.NodeKind.Follower
 import io.smallibs.kraft.election.data.Reaction.AppendRequested
 import io.smallibs.kraft.election.data.Reaction.ArmTimeout
 import io.smallibs.kraft.election.data.TimoutType.Election
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FollowerTransitionTest {
 
     @Test
-    fun `Follower should become an Elector on timeout`() {
+    fun should_become_an_Elector_on_timeout() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id, "C".id), "B".id)
                 .perform({ true }, TimeOut<Unit>(Election, 1.term))
@@ -30,7 +30,7 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should stay a Follower on RequestVote`() {
+    fun should_stay_a_on_RequestVote() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id, "C".id), "B".id)
                 .perform({ true }, RequestVote<Unit>("C".id, 1.term, 0.index to 0.term))
@@ -41,7 +41,7 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should become an Elector on Action with Younger Term`() {
+    fun should_become_an_Elector_on_Action_with_Younger_Term() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id), "B".id)
                 .perform({ true }, RequestVote<Unit>("A".id, 2.term, 0.index to 1.term))
@@ -52,7 +52,7 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should no change on Action with Older Term`() {
+    fun should_no_change_on_Action_with_Older_Term() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id), "B".id)
                 .perform({ true }, RequestVote<Unit>("A".id, 1.term, 0.index to 1.term))
@@ -63,7 +63,7 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should no change on Action with Leader Completeness is not verified`() {
+    fun should_no_change_on_Action_with_Leader_Completeness_is_not_verified() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id), "B".id)
                 .perform({ false }, Voted<Unit>("A".id, 1.term))
@@ -74,7 +74,7 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should no change on Action with RequestAppend but Accept the request`() {
+    fun should_no_change_on_Action_with_RequestAppend_but_Accept_the_request() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id), "B".id)
                 .perform({ true }, RequestAppend<Unit>("B".id, 1.term, 0.index to 1.term, 0.index))
@@ -88,12 +88,23 @@ class FollowerTransitionTest {
     }
 
     @Test
-    fun `Follower should no change on Action with AppendResponse`() {
+    fun should_no_change_on_Action_with_AppendResponse() {
         Transition.run {
             Follower("A".id, 1.term, listOf("A".id, "B".id, "C".id), "C".id)
                 .perform({ true }, AppendResponse<Unit>("B".id, 1.term, true, 1.index))
         }.let {
             assertEquals(Follower("A".id, 1.term, listOf("A".id, "B".id, "C".id), "C".id), it.first)
+            assertEquals(listOf(), it.second)
+        }
+    }
+
+    @Test
+    fun should_become_a_new_follower_with_a_RequestAppend_of_younger_term() {
+        Transition.run {
+            Follower("A".id, 1.term, listOf("A".id, "B".id, "C".id), "C".id)
+                .perform({ true }, RequestAppend<Unit>("B".id, 2.term, 0.index to 1.term, 0.index))
+        }.let {
+            assertEquals(Follower("A".id, 2.term, listOf("A".id, "B".id, "C".id), "B".id), it.first)
             assertEquals(listOf(), it.second)
         }
     }
