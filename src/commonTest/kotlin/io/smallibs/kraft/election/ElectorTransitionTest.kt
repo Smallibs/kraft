@@ -15,13 +15,13 @@ import io.smallibs.kraft.election.data.Reaction.AcceptVote
 import io.smallibs.kraft.election.data.Reaction.ArmTimeout
 import io.smallibs.kraft.election.data.Reaction.StartElection
 import io.smallibs.kraft.election.data.TimoutType.Election
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ElectorTransitionTest {
 
     @Test
-    fun `Elector become a Candidate on timeout`() {
+    fun should_become_a_Candidate_on_timeout() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id))
                 .perform({ true }, TimeOut<Unit>(Election, 1.term))
@@ -32,7 +32,7 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should become a Follower on RequestVote`() {
+    fun should_become_a_Follower_on_RequestVote() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id))
                 .perform({ true }, RequestVote<Unit>("B".id, 1.term, 0.index to 0.term))
@@ -43,7 +43,7 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should stay an Elector on Action with Younger Term`() {
+    fun should_stay_an_on_Action_with_Younger_Term() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id))
                 .perform({ true }, RequestVote<Unit>("A".id, 2.term, 0.index to 1.term))
@@ -54,7 +54,7 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should no change on Action with Older Term`() {
+    fun should_no_change_on_Action_with_Older_Term() {
         Transition.run {
             Elector("A".id, 2.term, listOf("A".id, "B".id, "C".id))
                 .perform({ true }, RequestVote<Unit>("A".id, 1.term, 0.index to 1.term))
@@ -65,7 +65,7 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should no change on Action with Leader Completeness is not verified`() {
+    fun should_no_change_on_Action_with_Leader_Completeness_is_not_verified() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id))
                 .perform({ false }, Voted<Unit>("A".id, 1.term))
@@ -76,7 +76,7 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should no change on Action with RequestAppend`() {
+    fun should_no_change_on_Action_with_RequestAppend() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id))
                 .perform({ true }, RequestAppend<Unit>("B".id, 1.term, 0.index to 1.term, 0.index))
@@ -87,12 +87,23 @@ class ElectorTransitionTest {
     }
 
     @Test
-    fun `Elector should no change on Action with AppendResponse`() {
+    fun should_no_change_on_Action_with_AppendResponse() {
         Transition.run {
             Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id))
                 .perform({ true }, AppendResponse<Unit>("B".id, 1.term, true, 1.index))
         }.let {
             assertEquals(Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id)), it.first)
+            assertEquals(listOf(), it.second)
+        }
+    }
+
+    @Test
+    fun should_become_a_follower_with_a_RequestAppend_of_younger_term() {
+        Transition.run {
+            Elector("A".id, 1.term, listOf("A".id, "B".id, "C".id))
+                .perform({ true }, RequestAppend<Unit>("B".id, 2.term, 0.index to 1.term, 0.index))
+        }.let {
+            assertEquals(Follower("A".id, 2.term, listOf("A".id, "B".id, "C".id), "B".id), it.first)
             assertEquals(listOf(), it.second)
         }
     }

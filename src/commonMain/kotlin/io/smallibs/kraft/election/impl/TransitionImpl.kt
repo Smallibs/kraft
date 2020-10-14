@@ -7,6 +7,7 @@ import io.smallibs.kraft.election.data.Action.AppendResponse
 import io.smallibs.kraft.election.data.Action.RequestAppend
 import io.smallibs.kraft.election.data.Action.RequestVote
 import io.smallibs.kraft.election.data.Action.TimeOut
+import io.smallibs.kraft.election.data.Action.Voted
 import io.smallibs.kraft.election.data.NodeKind
 import io.smallibs.kraft.election.data.NodeKind.Candidate
 import io.smallibs.kraft.election.data.NodeKind.Elector
@@ -22,7 +23,6 @@ import io.smallibs.kraft.election.data.Reaction.StartElection
 import io.smallibs.kraft.election.data.Reaction.SynchroniseLog
 import io.smallibs.kraft.election.data.TimoutType.Election
 import io.smallibs.kraft.election.data.TimoutType.Heartbeat
-
 class TransitionImpl : Transition {
 
     override fun <Command> NodeKind.perform(hasUpToDateLog: (Action<Command>) -> Boolean, action: Action<Command>) =
@@ -70,12 +70,14 @@ class TransitionImpl : Transition {
 
     private fun <Command> Candidate.perform(action: Action<Command>): TransitionResult<Command> =
         when (action) {
+            is RequestAppend<Command> ->
+                this.becomeFollower(action.leader).perform(action)
             is TimeOut ->
                 when {
                     action.timoutType != Election -> changeNothing()
                     else -> this.becomeElector().becomeCandidate() to listOf(StartElection(), ArmTimeout(Election))
                 }
-            is Action.Voted ->
+            is Voted ->
                 when {
                     hasWinElection() -> this.becomeLeader() to listOf(
                         InsertMarkInLog(),
@@ -102,7 +104,12 @@ class TransitionImpl : Transition {
         }
 
     private fun <Command> NodeKind.stepDown(action: Action<Command>): TransitionResult<Command> =
-        this.becomeElector(action.term) to when (this) {
+        when (action) {
+            is RequestAppend<Command> ->
+                this.becomeElector(action.term).becomeFollower(action.leader)
+            else ->
+                this.becomeElector(action.term)
+        } to when (this) {
             is Leader ->
                 listOf(ArmTimeout(Election))
             else ->

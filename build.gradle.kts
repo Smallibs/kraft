@@ -21,17 +21,8 @@ apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
 kotlin {
     jvm()
-    js {
-        browser {
-        }
-        nodejs {
-        }
-    }
-    // For ARM, should be changed to iosArm32 or iosArm64
-    // For Linux, should be changed to e.g. linuxX64
-    // For MacOS, should be changed to e.g. macosX64
-    // For Windows, should be changed to e.g. mingwX64
-    // macosX64("macos")
+    js().nodejs()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
