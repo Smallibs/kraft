@@ -4,7 +4,7 @@ A Kotlin multiplatform Raft consensus implementation base on:
 - immutability in order to be functional friendly,
 - an agnostic network layer,
 - an event based approach suitable for an implementation with actors and
-- an agnotic database layer i.e. based on abstract command execution.
+- an agnostic database layer i.e. based on abstract command execution.
 
 ##  Node Kind
 
