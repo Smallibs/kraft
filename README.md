@@ -32,7 +32,7 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
           |      |                                                                |        |
           |      |  TimeOut | ArmElectionTimeOut StartElection                    v        |
           |      V                                                             Follower ---+
-          +–- Candidate <-±                                                       |
+          +–- Candidate <-+                                                       |
  Higher   |      |    |   | TimeOut | ArmElection TimeOut StartElection           +--------+
   Term    |      |    |   | AcceptVote if No Quorum                                        |
           |      |    +---+                                                                |
@@ -49,7 +49,7 @@ be send to the corresponding Candidate. This AcceptVote is managed by a Candidat
 
 Things to be done:
 - a proof of this implementation
-- a client `insert` method conforming the specification
+- a client `insert` method conforming to the specification
 - the log compaction
 - use IO monads for database evolution for instance
 - ...
